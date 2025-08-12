@@ -1,0 +1,3 @@
+/node_modules
+/shipnpay/node_modules
+.env
