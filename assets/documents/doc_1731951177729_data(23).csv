@@ -1,0 +1,6 @@
+﻿"empId","employeeName","ssnNo","jobName","weekRange","rate","totalHours","overtimeHours","normalPay","overTimeRate","overtimePay","totalPay"
+"EMP2","vinay bhardwaj","123456789","web developer","06Oct-12Oct","$10","0 hr 2 min","0 hr 0 min","$0.35","$1.5","$0.00","$0.35"
+"EMP2","vinay bhardwaj","123456789","web developer","29Sep-05Oct","$10","0 hr 24 min","0 hr 0 min","$4.03","$1.5","$0.00","$4.03"
+"EMP2","vinay bhardwaj","123456789","web developer","22Sep-28Sep","$10","0 hr 12 min","0 hr 0 min","$1.94","$1.5","$0.00","$1.94"
+"EMP2","vinay bhardwaj","123456789","web developer","01Sep-07Sep","$10","1 hr 11 min","0 hr 0 min","$11.83","$1.5","$0.00","$11.83"
+"EMP2","vinay bhardwaj","123456789","web developer","11Aug-17Aug","$10","2 hr 0 min","0 hr 0 min","$20.00","$1.5","$0.00","$20.00"

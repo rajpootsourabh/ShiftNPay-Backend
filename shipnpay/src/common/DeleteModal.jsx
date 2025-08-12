@@ -60,7 +60,7 @@ function DeleteModal({ open, setOpen, setData, data, setSuccess, setError, setCu
                 setCircul(false)
             })
         } else {
-            console.log("on development process");
+            //console.log("on development process");
         }
     }
 

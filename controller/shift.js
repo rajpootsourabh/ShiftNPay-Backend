@@ -1,4 +1,5 @@
 const Employee = require("../model/Employee");
+const moment = require( 'moment-timezone');
 const Shift = require("../model/Shift");
 const User = require("../model/User");
 
@@ -12,13 +13,13 @@ exports.getShiftSingle = async (req, res) => {
         }
         return res.status(404).json({ msg: 'No shift data found!', success: false })
     } catch (error) {
-        console.log("error on getShiftData: ", error);
+        //console.log("error on getShiftData: ", error);
         return res.status(500).json({ msg: error.message, err: error, success: false })
     }
 }
 
 exports.getAllShifts = async (req, res) => {
-    const id = req.params.id
+    const id = req.payload.reqUserId
     try {
         const checkVedor = await User.findById(id)
         if (!checkVedor) {
@@ -31,43 +32,128 @@ exports.getAllShifts = async (req, res) => {
         }
         return res.status(404).json({ msg: 'No shifts found!', success: false })
     } catch (error) {
-        console.log("error on getAllShifts: ", error);
+        //console.log("error on getAllShifts: ", error);
         return res.status(500).json({ msg: error.message, err: error, success: false })
     }
 }
 
 exports.addShift = async (req, res) => {
-    // console.log("req.body: ", req.body);
-    const name = req.body.name
-    const start = req.body.start
-    const end = req.body.end
-    const userId = req.body?.userId
-    // console.log("name: ", name);
-    // console.log("start: ", start);
-    // console.log("end: ", end);
+    const { name, start, end, timezone } = req.body;
+    const userId = req.payload.reqUserId;
+    
     try {
-        const checkVedor = await User.findById(userId)
-        if (!checkVedor) {
-            return res.status(403).json({ msg: 'Access Forbidden!', success: false })
+        // Validate required fields
+        if (!name || !start || !end || !timezone) {
+            return res.status(400).json({ 
+                msg: 'Missing required fields: name, start, end, or timezone', 
+                success: false 
+            });
         }
-        const result = await Shift.create({ name: name, start: start, end, userId: userId })
-        /* const result = await Shift.findOneAndUpdate(
-            { _id: id },
-            { name: name, start: start, end, userId: userId },
-            { new: true, upsert: true }
-        ); */
+
+        // Verify user exists
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(403).json({ 
+                msg: 'Access Forbidden! User not found.', 
+                success: false 
+            });
+        }
+
+        // Convert local times to UTC
+        const utcStart = moment.tz(start, timezone).utc().toISOString();
+        const utcEnd = moment.tz(end, timezone).utc().toISOString();
+
+        // Validate end time is after start time
+        if (moment(utcEnd).isSameOrBefore(moment(utcStart))) {
+            return res.status(400).json({ 
+                msg: 'End time must be after start time', 
+                success: false 
+            });
+        }
+
+        // Create the shift with both local and UTC times
+        const result = await Shift.create({ 
+            name, 
+            start: utcStart,
+            end: utcEnd,
+            timezone,
+            utcStart, // Store UTC equivalent for querying
+            utcEnd,   // Store UTC equivalent for querying
+            userId 
+        });
+
         if (result) {
-            return res.status(200).json({ msg: `Shift added successfully.`, success: true })
+            return res.status(200).json({ 
+                msg: 'Shift added successfully', 
+                success: true,
+                data: {
+                    ...result._doc,
+                    localStart: start, // Return original local times
+                    localEnd: end
+                }
+            });
         }
-        return res.status(400).json({ msg: `Failed to add shift!`, success: false })
+
+        return res.status(400).json({ 
+            msg: 'Failed to add shift', 
+            success: false 
+        });
+
     } catch (error) {
-        console.log("error on addShift: ", error);
-        return res.status(500).json({ msg: error.message, err: error, success: false })
+        console.error("Error in addShift:", error);
+        return res.status(500).json({ 
+            msg: 'Internal server error',
+            error: error.message, 
+            success: false 
+        });
     }
-}
+};
+
+
+exports.updateShift = async (req, res) => {
+    const { id } = req.params;
+    const { name, start, end } = req.body;
+    const userId = req.payload.reqUserId;
+
+    try {
+        const checkVendor = await User.findById(userId);
+        if (!checkVendor) {
+            return res.status(403).json({ msg: 'Access Forbidden!', success: false });
+        }
+
+        const existingShift = await Shift.findOne({ _id: id, userId });
+        if (!existingShift) {
+            return res.status(404).json({ msg: 'Shift not found or unauthorized', success: false });
+        }
+
+        const updatedShift = await Shift.findByIdAndUpdate(
+            id,
+            { name, start, end },
+            { new: true } // Return the updated document
+        );
+
+        if (updatedShift) {
+            return res.status(200).json({ 
+                msg: 'Shift updated successfully', 
+                success: true,
+                data: updatedShift
+            });
+        }
+
+        return res.status(400).json({ msg: 'Failed to update shift', success: false });
+    } catch (error) {
+        console.error("Error in updateShift: ", error);
+        return res.status(500).json({ 
+            msg: error.message, 
+            err: error, 
+            success: false 
+        });
+    }
+};
+
 
 exports.deleteShift = async (req, res) => {
-    console.log("req.params: ", req.params);
+    //console.log("req.params: ", req.params);
     const id = req.params.id
 
     try {
@@ -81,14 +167,14 @@ exports.deleteShift = async (req, res) => {
         }
         return res.status(400).json({ msg: 'Failed to delete shift!', success: false })
     } catch (error) {
-        console.log("error on deleteShift: ", error);
+        //console.log("error on deleteShift: ", error);
         return res.status(500).json({ msg: error.message, err: error, success: false })
     }
 }
 
 
 /* exports.assignShiftToEmp = async (req, res) => {
-    console.log("req.body: ", req.body);
+    //console.log("req.body: ", req.body);
     const id = req.body.id
     const empId = req.body.empId
 
@@ -132,13 +218,13 @@ exports.deleteShift = async (req, res) => {
 
         return res.status(200).json({ msg: `Shift ${checkShift?.name} added successfully.`, success: true })
     } catch (error) {
-        console.log("error on assignShiftToEmp: ", error);
+        //console.log("error on assignShiftToEmp: ", error);
         return res.status(500).json({ msg: error.message, err: error, success: false })
     }
 } */
 
 exports.assignShiftToEmp = async (req, res) => {
-    // console.log("req.body: ", req.body);
+    // //console.log("req.body: ", req.body);
     const shiftId = req.body.id;
     const empId = req.body.empId;
 
@@ -168,14 +254,14 @@ exports.assignShiftToEmp = async (req, res) => {
 
         return res.status(200).json({ msg: `Shift ${checkShift.name} added successfully.`, success: true });
     } catch (error) {
-        console.log("error on assignShiftToEmp: ", error);
+        //console.log("error on assignShiftToEmp: ", error);
         return res.status(500).json({ msg: error.message, err: error, success: false });
     }
 };
 
 
 exports.removeAssignShiftToEmp = async (req, res) => {
-    // console.log("req.body: ", req.body);
+    // //console.log("req.body: ", req.body);
     const id = req.body.id
     const empId = req.body.empId
     try {
@@ -201,7 +287,7 @@ exports.removeAssignShiftToEmp = async (req, res) => {
 
         return res.status(200).json({ msg: `${checkShift?.name} removed successfully.`, success: true });
     } catch (error) {
-        console.log("error on removeAssignShiftToEmp: ", error);
+        //console.log("error on removeAssignShiftToEmp: ", error);
         return res.status(500).json({ msg: error.message, err: error, success: false })
     }
 }

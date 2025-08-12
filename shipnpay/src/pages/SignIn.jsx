@@ -91,7 +91,7 @@ export default function SignIn() {
     } else if (!EmailValidator.validate(emp.email)) {
       setValErr({ email: "Invalid email!", });
     } else if (!emp.password) {
-      // console.log("password: ");
+      // //console.log("password: ");
       setValErr({ password: "Password required!", });
     } else if (emp.password.length < 5) {
       setValErr({ password: "Password must be more than 5 words!", });
@@ -107,7 +107,7 @@ export default function SignIn() {
         setCustomVariant("error");
         setOpen(true);
         setCircul(false)
-        console.log("err: ", err);
+        //console.log("err: ", err);
       });
     }
   };

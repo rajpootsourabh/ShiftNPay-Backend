@@ -4,6 +4,23 @@ const { v4: uuidv4 } = require('uuid');
 const EmployeeSchema = new mongoose.Schema({
     name: {
         type: String,
+        default:''
+    },
+    firstName: {
+        type: String,
+        default:''
+    },
+    lastName: {
+        type: String,
+        default:''
+    },
+    middleName: {
+        type: String,
+        default:''
+    },
+    ssnNo: {
+        type: String,
+        default:''
     },
     email: {
         type: String
@@ -34,7 +51,8 @@ const EmployeeSchema = new mongoose.Schema({
         default: false
     },
     rate: {
-        type: Number
+        type: Number,
+        default: ""
     },
     rateType: {
         type: String,
@@ -49,6 +67,7 @@ const EmployeeSchema = new mongoose.Schema({
     },
     city: {
         type: String,
+        default:''
     },
     lane: {
         type: String
@@ -70,9 +89,11 @@ const EmployeeSchema = new mongoose.Schema({
     }],
     jobTitle: {
         type: String,
+        default:''
     },
     department: {
         type: String,
+        default:''
     },
     employeeId: {
         type: String,
@@ -93,20 +114,48 @@ const EmployeeSchema = new mongoose.Schema({
     },
     overTimeRate: {
         type: Number,
+        default: 1.5,
     },
     wage: {
         type: Number,
     },
     timeOff: {
         type: String,
+        default:''
     },
     device_token: {
         type: String,
+        default:''
     },
     availabilityPreference: {
         type: String,
         default: 'flexible',
+    },
+    empId: {
+        type: Number,
+        unique: true,
+    },
+    shiftPreferences: {
+        type: String,
+        default:''
+    },
+    certifications: {
+        type: String,
+        default:''
+    },
+    skills: {
+        type: String,
+        default:''
+    },
+    is_online: {
+        type: Boolean,
+        default: false
+    },
+    roomId:{
+        type:String,
+        default:null
     }
+
 }, { timestamps: true })
 
 const Employee = mongoose.model('employee', EmployeeSchema)

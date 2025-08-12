@@ -9,7 +9,20 @@ const AdminSchema = new mongoose.Schema({
     password: {
         type: String,
         required: true
+    },
+    firstName: {
+        type: String,
+    },
+    middleName: {
+        type: String,
+    },
+    lastName: {
+        type: String,
+    },
+    image: {
+        type: String,
     }
+
 }, { timestamps: true })
 
 const Admin = mongoose.model("admin", AdminSchema)

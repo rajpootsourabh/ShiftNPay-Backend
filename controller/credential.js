@@ -16,7 +16,7 @@ exports.getAllCredentials = async (req, res) => {
         }
         return res.status(404).json({ msg: 'No Keys data found!', success: false })
     } catch (error) {
-        console.log("error on addCredential: ", error);
+        //console.log("error on addCredential: ", error);
         return res.status(500).json({ msg: error.message, err: error, success: false })
     }
 }
@@ -26,17 +26,17 @@ exports.addCredential = async (req, res) => {
     const description = req.body.description
     const credential = req.body.credential
     const id = req.body?.id
-    // console.log("req.body: ", req.body);
+    // //console.log("req.body: ", req.body);
 
 
     try {
         // const hasCred = await bcrypt.hashSync(credential, parseInt(salt))
         const encryptedText = CryptoJS.AES.encrypt(credential, secret).toString();
-        // console.log("encryptedText: ", encryptedText);
+        // //console.log("encryptedText: ", encryptedText);
 
 
         // const decryption = CryptoJS.AES.decrypt(encryptedText, secret).toString()
-        // console.log("decryption", decryption);
+        // //console.log("decryption", decryption);
 
         const result = await Credential.findOneAndUpdate(
             { $or: [{ name: name }, { _id: id }] },
@@ -48,7 +48,7 @@ exports.addCredential = async (req, res) => {
         }
         return res.status(400).json({ msg: `Failed to add credential!`, success: false })
     } catch (error) {
-        console.log("error on addCredential: ", error);
+        //console.log("error on addCredential: ", error);
         return res.status(500).json({ msg: error.message, err: error, success: false })
     }
 }
@@ -67,7 +67,7 @@ exports.decryptKeyAndSend = async (req, res) => {
         }
         return res.status(400).json({ msg: 'Failed to decrypt!', success: false })
     } catch (error) {
-        console.log("error on decryptKeyAndSend: ", error);
+        //console.log("error on decryptKeyAndSend: ", error);
         return res.status(500).json({ msg: error.message, err: error, success: false })
     }
 }
@@ -81,7 +81,7 @@ exports.deleteKey = async (req, res) => {
         }
         return res.status(400).json({msg: 'Failed to delete api key!', success: false})
     } catch (error) {
-        console.log("error on deleteKey: ", error);
+        //console.log("error on deleteKey: ", error);
         return res.status(500).json({ msg: error.message, err: error, success: false })
     }
 }

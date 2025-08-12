@@ -16,7 +16,7 @@ function Home() {
     const user = useSelector((state) => state.user.user);
     const options = { Authorization: `Bearer ${localStorage.getItem("shifnpay-token")}`, "Content-Type": "application/json" };
 
-    // console.log("options: ", options);
+    // //console.log("options: ", options);
     const [loading, setLoading] = useState(true)
 
     // const [empCount, setEmpCount] = useState(0)
@@ -27,7 +27,7 @@ function Home() {
     const [inActiveVender, setInActiveVeder] = useState(0)
     const [activeVender, setActiveVender] = useState(0)
 
-    // console.log("user: ", user);
+    // //console.log("user: ", user);
     const getDataCount = async () => {
         return await axios.get(`${baseUrl}/admin/get-count/${user?._id}`, { headers: options }).then((response) => {
             // setEmpCount(response.data.result.empCount)
@@ -39,7 +39,7 @@ function Home() {
             setActiveVender(response.data.result.vendorActiveCount)
             setLoading(false)
         }).catch((error) => {
-            // console.log("error on getDataCount: ", error);
+            // //console.log("error on getDataCount: ", error);
             setLoading(false)
         })
     }

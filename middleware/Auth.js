@@ -16,10 +16,13 @@ exports.verifyToken = async (req, res, next) => {
         if (!decodedToken) {
             return res.status(403).json({ msg: 'Access Forbidden!', success: false })
         }
+        // //console.log(decodedToken.result)
         req.payload = decodedToken.result
+        req.payload.reqUserId = decodedToken.result._id;
+        //console.log(' req.payload.reqUserId : ' ,  req.payload.reqUserId)
         next()
     } catch (error) {
-        console.log("error on verifyToken: ", error);
+        //console.log("error on verifyToken: ", error);
         return res.status(500).json({ msg: error.message, err: error, success: false })
     }
 }

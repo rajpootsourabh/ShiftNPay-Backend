@@ -29,6 +29,14 @@ const UserSchema = new mongoose.Schema({
         type: String,
         default: 'vender'
     },
+    is_online: {
+        type: Boolean,
+        default: false
+    },
+    roomId:{
+        type:String,
+        default:null
+    }
 
 }, { timestamps: true })
 

@@ -55,7 +55,7 @@ function Credentials() {
             setKeys(response.data.result)
             setFilterData(response.data.result)
             setDecrypted({ id: null, key: response.data?.result[0]?.credential })
-            // console.log("result: ", response.data.result);
+            // //console.log("result: ", response.data.result);
             setLoading(false)
         }).catch((error) => {
             setSuccess("")
@@ -63,7 +63,7 @@ function Credentials() {
             setCustomVariant("error")
             setOpen(true)
             setLoading(false)
-            console.log("error: ", error);
+            //console.log("error: ", error);
             if (error.response.status == 401) {
                 localStorage.removeItem("shifnpay-token")
                 navigate("/signin");
@@ -91,7 +91,7 @@ function Credentials() {
         setPage(0);
     };
 
-    // console.log("keys: ", decrypted);
+    // //console.log("keys: ", decrypted);
     useEffect(() => {
         getAllKeysList()
     }, [loading])
@@ -116,7 +116,7 @@ function Credentials() {
         })
     }
 
-    // console.log("decrypted: ", decrypted);
+    // //console.log("decrypted: ", decrypted);
 
     return (
         <Box>

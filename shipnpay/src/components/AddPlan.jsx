@@ -18,7 +18,7 @@ function AddPlan() {
     const navigate = useNavigate()
     const { id } = useParams()
 
-    // console.log("id: ", id);
+    // //console.log("id: ", id);
 
     const [circul, setCircul] = useState(false)
 
@@ -52,7 +52,7 @@ function AddPlan() {
             setPlan(response.data.result)
             setLoading(false)
         }).catch((err) => {
-            console.log("error on getSinglePlan: ", err);
+            //console.log("error on getSinglePlan: ", err);
         })
     }
 

@@ -14,7 +14,7 @@ const TrackingSchema = new mongoose.Schema({
     sessionDate: {
         type: Date,
         required: true,
-        default: () => new Date().setHours(0, 0, 0, 0) // set to the start of the current day
+        default: () => new Date().setHours(0, 0, 0, 0) // Start of the current day
     },
     name: {
         type: String,
@@ -29,13 +29,16 @@ const TrackingSchema = new mongoose.Schema({
     lastStartTime: {
         type: Date,
     },
+    breakLastStartTime: {
+        type: Date,
+    },
     isTimerRunning: {
         type: Boolean,
         default: false
     },
     elapsedTime: {
         type: Number,
-        default: 0
+        default: 0 // Total work time
     },
     count: {
         type: Number
@@ -45,7 +48,36 @@ const TrackingSchema = new mongoose.Schema({
     },
     overAmount: {
         type: Number
-    }
+    },
+    status: {
+        type: String,
+        enum: ['approved', 'rejected', 'pending'],
+        default: 'pending',
+    },
+    isOnBreak: {
+        type: Boolean,
+        default: false // Indicates if the user is currently on a break
+    },
+    totalBreakTime: {
+        type: Number,
+        default: 0 // Stores total break time in milliseconds
+    },
+    clockLogs: [{
+        type: {
+            type: String,
+            enum: ['clock-in', 'clock-out', 'break-in', 'break-out'], // Added break-in/break-out
+            required: true
+        },
+        time: {
+            type: Date,
+            required: true,
+            default: Date.now
+        },
+        title: {
+            type: String,
+            required: function () { return this.type === 'break-in'; } // Required only for 'break-in'
+        }
+    }]
 }, { timestamps: true });
 
 const Tracking = mongoose.model('tracking', TrackingSchema);

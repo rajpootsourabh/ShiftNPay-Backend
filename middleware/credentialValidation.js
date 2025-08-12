@@ -1,7 +1,7 @@
 
 
 exports.credentailValidation = async (req, res, next) => {
-    // console.log("req.body: ", req.body);
+    // //console.log("req.body: ", req.body);
     const name = req.body.name
     const credential = req.body.credential
 
@@ -14,7 +14,7 @@ exports.credentailValidation = async (req, res, next) => {
             next()
         }
     } catch (error) {
-        console.log("error on credentailValidation: ", error);
+        //console.log("error on credentailValidation: ", error);
         return res.status(500).json({ msg: error.message, err: error, success: false })
     }
 }

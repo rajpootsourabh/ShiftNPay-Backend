@@ -1,14 +1,15 @@
 const express = require('express')
-const { addShift, deleteShift, getShiftSingle, getAllShifts, assignShiftToEmp, removeAssignShiftToEmp } = require('../controller/shift')
+const { addShift, deleteShift, getShiftSingle, getAllShifts, assignShiftToEmp, removeAssignShiftToEmp, updateShift } = require('../controller/shift')
+const { verifyToken } = require('../middleware/Auth')
 const shiftRouter = express.Router()
 
 shiftRouter.get('/get-by-id/:id', getShiftSingle)
 
-shiftRouter.get('/get-all/:id', getAllShifts)
+shiftRouter.get('/get-all/',verifyToken, getAllShifts)
 
-shiftRouter.post('/add', addShift)
+shiftRouter.post('/add',verifyToken, addShift)
 
-shiftRouter.post('/update', addShift)
+shiftRouter.put('/update/:id',verifyToken, updateShift)
 
 shiftRouter.delete('/delete/:id', deleteShift)
 

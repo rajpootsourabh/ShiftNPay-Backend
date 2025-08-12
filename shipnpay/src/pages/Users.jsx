@@ -31,7 +31,7 @@ function Users() {
             setLoading(false)
         }).catch((error) => {
             setLoading(false)
-            console.log("error: ", error);
+            //console.log("error: ", error);
         })
     }
 
@@ -55,7 +55,7 @@ function Users() {
         setPage(0);
     };
 
-    // console.log("vendor: ", vendor);
+    // //console.log("vendor: ", vendor);
 
     useEffect(() => {
         getAllVendorList()

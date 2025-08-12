@@ -5,8 +5,8 @@ const moment = require("moment");
 exports.calculateWeeklyHours = async (userId) => {
     const startOfWeek = moment().startOf('isoWeek').startOf('day').toDate();
     const endOfWeek = moment().endOf('isoWeek').endOf('day').toDate();
-    console.log('startOfWeek : ' ,startOfWeek);
-    console.log('endOfWeek : ' ,endOfWeek);
+    //console.log('startOfWeek : ' ,startOfWeek);
+    //console.log('endOfWeek : ' ,endOfWeek);
     const results = await Tracking.aggregate([
         {
             $match: {
