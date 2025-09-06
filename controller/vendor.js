@@ -1649,3 +1649,13 @@ exports.getEmployeeList = async (req, res) => {
     }
 }
 
+
+exports.getProfile = async (req, res) => {
+    try {
+        
+        return res.status(200).json({ msg: "Ok", success: true, user : req.user});
+    } catch (error) {
+        //console.log("Error fetching employee job tracking: ", error);
+        return res.status(500).json({ msg: error.message, err: error, success: false });
+    }
+}

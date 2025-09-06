@@ -22,7 +22,7 @@ const ShiftSchema = new mongoose.Schema({
     timezone: {
         type: String,
         required: [true, 'Timezone is required'],
-        default: 'UTC',
+        default: '"America/Chicago"',
         enum: {
             values: Intl.supportedValuesOf('timeZone'),
             message: '{VALUE} is not a supported timezone'

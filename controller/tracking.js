@@ -164,23 +164,23 @@ exports.getTrackingTimeByUserId = async (req, res) => {
         }
 
         if (!result || result.length === 0) {
-            return res.status(404).json({ 
-                msg: "No timers found for today or last 24 hours!", 
-                success: false 
+            return res.status(404).json({
+                msg: "No timers found for today or last 24 hours!",
+                success: false
             });
         }
 
-        return res.status(200).json({ 
-            msg: "Ok", 
-            success: true, 
-            result 
+        return res.status(200).json({
+            msg: "Ok",
+            success: true,
+            result
         });
     } catch (error) {
         console.error("Error in getTrackingTimeByUserId: ", error);
-        return res.status(500).json({ 
-            msg: "Internal Server Error", 
-            error: error.message, 
-            success: false 
+        return res.status(500).json({
+            msg: "Internal Server Error",
+            error: error.message,
+            success: false
         });
     }
 };
@@ -279,7 +279,7 @@ exports.createTrackingTime = async (req, res) => {
                 time: now,
             });
 
-          
+
         } else {
             // Shouldn't normally get here due to activeTracking check above
             return res.status(200).json({
@@ -325,16 +325,16 @@ exports.handleBreakTime = async (req, res) => {
             jobId,
             isTimerRunning: true,
             $or: [
-                { 
+                {
                     // Timers that started yesterday and are still running
-                    startTime: { 
+                    startTime: {
                         $gte: yesterdayMidnight,
                         $lt: todayMidnight
                     }
                 },
-                { 
+                {
                     // Timers that started today and are running
-                    startTime: { $gte: todayMidnight } 
+                    startTime: { $gte: todayMidnight }
                 }
             ]
         }).sort({ createdAt: -1 });
@@ -348,64 +348,64 @@ exports.handleBreakTime = async (req, res) => {
             });
 
             if (oldTracking) {
-                return res.status(400).json({ 
-                    msg: "Cannot take break - timer was started before yesterday midnight", 
-                    success: false 
+                return res.status(400).json({
+                    msg: "Cannot take break - timer was started before yesterday midnight",
+                    success: false
                 });
             }
-            return res.status(404).json({ 
-                msg: "No active tracking found since yesterday midnight!", 
-                success: false 
+            return res.status(404).json({
+                msg: "No active tracking found since yesterday midnight!",
+                success: false
             });
         }
 
         // 2. Handle break actions
         if (action === "break-in") {
             if (tracking.isOnBreak) {
-                return res.status(400).json({ 
-                    msg: "Already on break!", 
-                    success: false 
+                return res.status(400).json({
+                    msg: "Already on break!",
+                    success: false
                 });
             }
 
-            tracking.clockLogs.push({ 
-                type: "break-in", 
-                time: now, 
-                title: title 
+            tracking.clockLogs.push({
+                type: "break-in",
+                time: now,
+                title: title
             });
             tracking.breakLastStartTime = now;
             tracking.isOnBreak = true;
             await tracking.save();
 
-            return res.status(200).json({ 
-                msg: "Break started successfully.", 
-                success: true, 
-                result: tracking 
+            return res.status(200).json({
+                msg: "Break started successfully.",
+                success: true,
+                result: tracking
             });
 
         } else if (action === "break-out") {
             if (!tracking.isOnBreak) {
-                return res.status(400).json({ 
-                    msg: "Not currently on a break!", 
-                    success: false 
+                return res.status(400).json({
+                    msg: "Not currently on a break!",
+                    success: false
                 });
             }
 
             const lastBreakIn = tracking.clockLogs
                 .filter(log => log.type === "break-in")
                 .pop();
-            
+
             if (!lastBreakIn) {
-                return res.status(400).json({ 
-                    msg: "No break-in record found!", 
-                    success: false 
+                return res.status(400).json({
+                    msg: "No break-in record found!",
+                    success: false
                 });
             }
 
             const breakDuration = (now - new Date(tracking.breakLastStartTime)) / 1000;
-            tracking.clockLogs.push({ 
-                type: "break-out", 
-                time: now 
+            tracking.clockLogs.push({
+                type: "break-out",
+                time: now
             });
             tracking.totalBreakTime += breakDuration;
             tracking.isOnBreak = false;
@@ -418,18 +418,18 @@ exports.handleBreakTime = async (req, res) => {
             });
 
         } else {
-            return res.status(400).json({ 
-                msg: "Invalid action!", 
-                success: false 
+            return res.status(400).json({
+                msg: "Invalid action!",
+                success: false
             });
         }
 
     } catch (error) {
         console.error("Error in handleBreakTime: ", error);
-        return res.status(500).json({ 
-            msg: "Internal Server Error", 
-            error: error.message, 
-            success: false 
+        return res.status(500).json({
+            msg: "Internal Server Error",
+            error: error.message,
+            success: false
         });
     }
 };
@@ -439,7 +439,7 @@ exports.handleBreakTime = async (req, res) => {
 exports.getcurrentTimeOfTracker = async (req, res) => {
     try {
         const { userId, jobId } = req.params;
-        
+
         // Get timestamp for 24 hours ago
         const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
         const todayMidnight = new Date();
@@ -450,11 +450,11 @@ exports.getcurrentTimeOfTracker = async (req, res) => {
             jobId,
             isTimerRunning: true,
             $or: [
-                { 
+                {
                     // Timers that started within last 24 hours
                     startTime: { $gte: twentyFourHoursAgo }
                 },
-                { 
+                {
                     // Or were last active within last 24 hours
                     lastStartTime: { $gte: twentyFourHoursAgo }
                 }
@@ -470,34 +470,35 @@ exports.getcurrentTimeOfTracker = async (req, res) => {
             }).sort({ createdAt: -1 });
 
 
-            
+
         }
 
         let currentTime = tracking?.elapsedTime || 0;
-            if (tracking?.isTimerRunning) {
-                const now = Date.now();
-                const lastStart = new Date(tracking.lastStartTime || tracking.startTime).getTime();
-                currentTime += (now - lastStart) / 1000;
-            }
-    
-            return res.status(200).json({
-                msg: "Ok",
-                success: true,
-                ...tracking.toObject(),
-                elapsedTime: currentTime
-            });
+        if (tracking?.isTimerRunning) {
+            const now = Date.now();
+            const lastStart = new Date(tracking.lastStartTime || tracking.startTime).getTime();
+            currentTime += (now - lastStart) / 1000;
+        }
+
+        return res.status(200).json({
+            msg: "Ok",
+            success: true,
+            ...(tracking ? tracking.toObject ? tracking.toObject() : tracking : {}),
+            elapsedTime: currentTime
+        });
+
 
 
 
         // Calculate current elapsed time
-        
+
 
     } catch (error) {
         console.error("Error in getcurrentTimeOfTracker: ", error);
-        return res.status(500).json({ 
-            msg: "Internal Server Error", 
-            error: error.message, 
-            success: false 
+        return res.status(500).json({
+            msg: "Internal Server Error",
+            error: error.message,
+            success: false
         });
     }
 };
@@ -545,7 +546,7 @@ exports.updateTrackingTime = async (req, res) => {
         if (!tracking) {
             const previousDay = new Date(startOfLocalDay);
             previousDay.setDate(previousDay.getDate() - 1);
-            
+
             tracking = await Tracking.findOne({
                 userId,
                 jobId,
@@ -561,24 +562,24 @@ exports.updateTrackingTime = async (req, res) => {
             //         type: 'clock-out',
             //         time: new Date(previousDay.setHours(23, 59, 59, 999)),
             //     });
-                
+
             // }
         }
 
         // If still no active timer found
         if (!tracking) {
-            return res.status(404).json({ 
-                msg: "No active timer found to stop", 
-                success: false 
+            return res.status(404).json({
+                msg: "No active timer found to stop",
+                success: false
             });
         }
 
         // 4. Validate employee data
         const checkEmp = await Employee.findOne({ _id: tracking.userId });
         if (!checkEmp) {
-            return res.status(404).json({ 
-                msg: 'Employee data not found!', 
-                success: false 
+            return res.status(404).json({
+                msg: 'Employee data not found!',
+                success: false
             });
         }
 
@@ -588,8 +589,8 @@ exports.updateTrackingTime = async (req, res) => {
             tracking.elapsedTime += timeElapsed;
             tracking.isTimerRunning = false;
             tracking.stoppedTime = now;
-            tracking.clockLogs.push({ 
-                type: 'clock-out', 
+            tracking.clockLogs.push({
+                type: 'clock-out',
                 time: now,
                 localTime: userLocalDate
             });
@@ -605,7 +606,7 @@ exports.updateTrackingTime = async (req, res) => {
         // 6. Calculate payment
         let amount = 0;
         let totalWorkedSeconds = Math.floor(tracking.elapsedTime);
-        
+
         if (totalWorkedSeconds <= secondsInaWeek) {
             amount = calculateEarnings(checkEmp.rate, totalWorkedSeconds);
         } else {
@@ -619,18 +620,18 @@ exports.updateTrackingTime = async (req, res) => {
         tracking.amount = amount;
         const result = await tracking.save();
 
-        return res.status(200).json({ 
-            msg: "Timer stopped successfully", 
-            success: true, 
-            result 
+        return res.status(200).json({
+            msg: "Timer stopped successfully",
+            success: true,
+            result
         });
 
     } catch (error) {
         console.error("Error in updateTrackingTime: ", error);
-        return res.status(500).json({ 
-            msg: "Internal Server Error", 
-            error: error.message, 
-            success: false 
+        return res.status(500).json({
+            msg: "Internal Server Error",
+            error: error.message,
+            success: false
         });
     }
 };

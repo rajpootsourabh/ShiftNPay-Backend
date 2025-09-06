@@ -21,6 +21,10 @@ const ServiceCodeController = require('./../controller/IDB_SYS/Client/ServiceCod
 const CaseManagerController = require('./../controller/IDB_SYS/Client/CaseManager');
 const CareGiverController = require('./../controller/IDB_SYS/Client/CareGiver');
 const ClientController = require('./../controller/IDB_SYS/Client/Client');
+const PhysicianController = require('./../controller/IDB_SYS/Client/Physician');
+const PayorController = require('./../controller/IDB_SYS/Client/Payor');
+const scheduleController = require('./../controller/IDB_SYS/Schedule/scheduleController');
+const timesheetController = require('./../controller/IDB_SYS/TimeSheet/TimeSheetWeek');
 
 
 router.get('/agency', authMiddleware.employer, agencyController.getAgenciesByVendor);
@@ -140,6 +144,35 @@ router.get('/client/single/:id', authMiddleware.employer,ClientController.getCli
 router.post('/client', authMiddleware.employer,ClientController.createClient);
 router.put('/client/:id', authMiddleware.employer,ClientController.updateClient);
 router.delete('/client/:id', authMiddleware.employer,ClientController.deleteClient);
+
+
+router.get('/physician', authMiddleware.employer,PhysicianController.getPhysician);
+router.get('/physician/single/:id', authMiddleware.employer,PhysicianController.getPhysicianById);
+router.post('/physician', authMiddleware.employer,PhysicianController.createPhysician);
+router.put('/physician/:id', authMiddleware.employer,PhysicianController.updatePhysician);
+router.delete('/physician/:id', authMiddleware.employer,PhysicianController.deletePhysician);
+
+
+router.get('/payor', authMiddleware.employer,PayorController.getPayor);
+router.get('/payor/single/:id', authMiddleware.employer,PayorController.getPayorById);
+router.post('/payor', authMiddleware.employer,PayorController.createPayor);
+router.put('/payor/:id', authMiddleware.employer,PayorController.updatePayor);
+router.delete('/payor/:id', authMiddleware.employer,PayorController.deletePayor);
+
+router.get('/schedule', authMiddleware.employer,scheduleController.getAllSchedules);
+router.get('/schedule/date-range', authMiddleware.employer,scheduleController.getSchedulesByDateRange);
+router.get('/schedule/:id', authMiddleware.employer,scheduleController.getSchedule);
+router.post('/schedule', authMiddleware.employer,scheduleController.createSchedule);
+router.put('/schedule/:id', authMiddleware.employer,scheduleController.updateSchedule);
+router.delete('/schedule/:id', authMiddleware.employer,scheduleController.deleteSchedule);
+router.get('/schedule/jobs/all', authMiddleware.employer, scheduleController.fetchVendorJobs)
+
+router.post( '/timesheet-weeks',authMiddleware.employer,timesheetController.createWeeksRange);
+router.get('/timesheet-weeks',authMiddleware.employer,timesheetController.getAllWeeks);
+router.patch('/timesheet-weeks/:id/lock',authMiddleware.employer,timesheetController.lockWeek);
+router.patch('/timesheet-weeks/:id/unlock',authMiddleware.employer,timesheetController.unlockWeek);
+router.post('/timesheet-weeks/recreate',authMiddleware.employer,timesheetController.updateWeek);
+router.post( '/timesheet-weeks/fetch-schedules',authMiddleware.employer,timesheetController.fetchWeeklySchedules);
 
 
 module.exports = router;

@@ -2,6 +2,7 @@ const Employee = require("../model/Employee");
 const moment = require( 'moment-timezone');
 const Shift = require("../model/Shift");
 const User = require("../model/User");
+const { EmployeeModel } = require("../model");
 
 exports.getShiftSingle = async (req, res) => {
     const id = req.params.id
@@ -36,6 +37,28 @@ exports.getAllShifts = async (req, res) => {
         return res.status(500).json({ msg: error.message, err: error, success: false })
     }
 }
+
+
+exports.getAllShiftsOfEmployee = async (req, res) => {
+    const id = req.params.empId
+    try {
+
+        const result = await EmployeeModel.findById(id).populate({
+    path: "jobId",
+    populate: {
+      path: "shift",   // <-- populate inside job
+    },
+  });
+        if (result) {
+            return res.status(200).json({ msg: 'Ok', success: true, result })
+        }
+        return res.status(404).json({ msg: 'No shifts found!', success: false })
+    } catch (error) {
+        //console.log("error on getAllShifts: ", error);
+        return res.status(500).json({ msg: error.message, err: error, success: false })
+    }
+}
+
 
 exports.addShift = async (req, res) => {
     const { name, start, end, timezone } = req.body;
