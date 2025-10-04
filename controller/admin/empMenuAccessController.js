@@ -10,6 +10,7 @@ const getMainCategories = () => {
 
 exports.getProductCategory = async (req, res) => {
   try {
+    console.log(empMenuItems , ' empMenuItems')
     const categories = empMenuItems.map(category => ({
       title: category.name,
     }));
@@ -24,6 +25,7 @@ exports.getProductCategory = async (req, res) => {
 // @access  Private/Admin
 exports.getEmployeesForCategory = async (req, res) => {
   try {
+    console.log(req.query.category,'req.query.category')
     const category = decodeURIComponent(req.query.category); // e.g., 'reports-&-analytics'
 
     // Step 1: Find access records with this category

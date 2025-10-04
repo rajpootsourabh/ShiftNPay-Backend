@@ -187,6 +187,14 @@ exports.respondToJobRequest = async (req, res) => {
       queue.status = 'accepted';
       await queue.save();
 
+      // Notify vendor
+      //   await NotificationService.notifyVendor(
+      //     queue.vendorId,
+      //     'Job Accepted',
+      //     `${currentEmployee.name} accepted job: ${queue.jobId.title}`,
+      //     { jobId: queue.jobId._id }
+      //   );
+
     let vendor = await User.findById({ _id:  queue.vendorId });
     await Services.NotificationService.sendNotification(vendor._id, vendor.device_token, 'Job Accepted!', `${currentEmployee.name} accepted job: ${queue.jobId.title}`);
 

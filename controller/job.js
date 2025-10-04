@@ -68,7 +68,7 @@ exports.addJob = async (req, res) => {
 exports.assignShift = async (req, res) => {
     const {id} = req.params;
     const {shiftId ,vendorId} = req.body;
-    // console.log(id,'id')
+    console.log(id,'id')
     try {
         const checkUser = await User.findById(vendorId)
         if (!checkUser) {

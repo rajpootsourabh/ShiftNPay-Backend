@@ -20,10 +20,10 @@ const socketAuthMiddleware = (...roles) => {
       if (tokenBlacklist.has(token)) {
         throw new Error('Authentication error: Token is blacklisted');
       }
+      console.log(token,'token')
       let decoded;
       try {
         decoded = jwt.verify(token, process.env.SECRET);
-
       } catch (err) {
         throw new Error('Invalid token');
       }
@@ -32,8 +32,6 @@ const socketAuthMiddleware = (...roles) => {
         user = await Model.EmployeeModel.findById(new ObjectId(decoded.result._id));
 
       }
-
-
       if (!user) {
         throw new Error('User not found');
       }

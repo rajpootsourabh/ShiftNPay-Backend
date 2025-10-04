@@ -6,7 +6,6 @@ const menuCategories = [
     routes: [
       { title: "Dashboard", path: "/", icon: "MdDashboard" ,component : "Home" , isOuter: true},
       { title: "Employees", path: "/staff", icon: "MdPeople" ,component : "Staff" , isOuter: true},
-      { title: "Employees", path: "/staff/:id", icon: "MdPeople" ,component : "EmpDetails" , isOuter: false},
       { title: "Jobs", path: "/job", icon: "MdWork" ,component : "Jobs" , isOuter: true},
       { title: "Shift Master", path: "/shift", icon: "MdManageHistory" ,component : "Shift" , isOuter: true},
       { title: "Shift Master", path: "/shift/assign/:id", icon: "MdManageHistory" ,component : "ShiftAssign" , isOuter: false},

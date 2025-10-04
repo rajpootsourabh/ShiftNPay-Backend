@@ -107,7 +107,7 @@ exports.getAllEmployeeLeaves = async (req, res) => {
     try {
         // Fetch all employees for the vendor
         const employees = await Employee.find({ userId: vendorId }, '_id firstName lastName email');
-        //console.log('employees : employees', employees)
+        console.log('employees : employees', employees)
 
         // Fetch all leave types
         const leaveTypes = await LeaveType.find({vendorId}, '_id name '); // Assuming leave type has name field
@@ -463,7 +463,7 @@ exports.applyLeave = async (req, res) => {
                 message: `You are trying to apply for ${duration} days, but only ${availableLeave} days are available.`,
             });
         }
-        //console.log('duration ::::::' , duration)
+        console.log('duration ::::::' , duration)
         // Add the new leave request to the consumed array
         leave.consumed.push({
             appliedDate: new Date(),
@@ -672,9 +672,9 @@ consumedLeaves = consumedLeaves.filter((item) => {
   const endDate = new Date(leave.endDate);
   endDate.setUTCHours(0, 0, 0, 0); // Normalize to start of the day in UTC
 
-  //console.log("leave.startDate (UTC): ", startDate.toISOString().split("T")[0]);
-  //console.log("leave.endDate (UTC): ", endDate.toISOString().split("T")[0]);
-  //console.log("today (UTC): ", today.toISOString().split("T")[0]);
+  console.log("leave.startDate (UTC): ", startDate.toISOString().split("T")[0]);
+  console.log("leave.endDate (UTC): ", endDate.toISOString().split("T")[0]);
+  console.log("today (UTC): ", today.toISOString().split("T")[0]);
 
   // Check if today matches or is within the range
   return (
@@ -722,7 +722,7 @@ exports.approveLeave = async (req, res) => {
         await leaveManagement.save();
         const employee = await Employee.findById(leaveManagement.employeeId);
         let vendor = await User.findOne({_id : vendorId})
-         await Services.NotificationService.sendNotification(employee._id, null, 'Leave Approved!', ` ${vendor.name} has Approved your Leave request of ${leaveToApprove.count} day.`, {});
+         await Services.NotificationService.sendNotification(employee._id, employee.device_token, 'Leave Approved!', ` ${vendor.name} has Approved your Leave request of ${leaveToApprove.count} day.`, {});
 
         return res.status(200).json({ msg: 'Leave approved successfully.', leave: leaveToApprove });
     } catch (err) {
@@ -755,7 +755,7 @@ exports.rejectLeave = async (req, res) => {
 
         const employee = await Employee.findById(leaveManagement.employeeId);
         let vendor = await User.findOne({_id : vendorId})
-         await Services.NotificationService.sendNotification(employee._id, null, 'Leave Rejected!', ` ${vendor.name} has Rejected your Leave request of ${leaveToReject.count} day.`, {});
+         await Services.NotificationService.sendNotification(employee._id, employee.device_token, 'Leave Rejected!', ` ${vendor.name} has Rejected your Leave request of ${leaveToReject.count} day.`, {});
 
 
         return res.status(200).json({ msg: 'Leave rejected successfully.', leave: leaveToReject });

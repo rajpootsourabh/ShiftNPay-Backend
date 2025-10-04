@@ -2,8 +2,9 @@ const moment = require('moment');
 
 
 exports.getWeekStartEnd = (year, week) => {
-  const startDate = moment().year(year).week(week).startOf('week').toDate();
-  const endDate = moment().year(year).week(week).endOf('week').toDate();
+  const startDate = moment().year(year).week(week).startOf("week").startOf("day").toDate();
+  const endDate = moment().year(year).week(week).endOf("week").endOf("day").toDate();
+  console.log({ startDate, endDate })
   return { startDate, endDate };
 };
 
@@ -21,5 +22,3 @@ exports.getWeekRange = (date) => {
 
   return { start: start, end: end };
 }
-
-

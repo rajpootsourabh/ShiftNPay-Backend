@@ -16,14 +16,14 @@ exports.getByEmpId = async (req, res) => {
         }
         return res.status(400).json({ msg: 'No review data found!', success: false })
     } catch (error) {
-        //console.log("error on getByEmpId: ", error);
+        console.log("error on getByEmpId: ", error);
         return res.status(500).json({ msg: error.message, err: error, success: false })
     }
 }
 
 
 exports.addFeedBack = async (req, res) => {
-    // //console.log("req.body: ", req.body);
+    // console.log("req.body: ", req.body);
     const id = req.body.id
     const userId = req.body.userId
     const feed = req.body.feed
@@ -46,14 +46,14 @@ exports.addFeedBack = async (req, res) => {
         }
         return res.status(400).json({ msg: 'Failed to add review!', success: false })
     } catch (error) {
-        //console.log("error on addFeedBack: ", error);
+        console.log("error on addFeedBack: ", error);
         return res.status(500).json({ msg: error.message, err: error, success: false })
     }
 }
 
 
 exports.updateFeedBack = async (req, res) => {
-    // //console.log("req.body: ", req.body);
+    // console.log("req.body: ", req.body);
     const id = req.body.id
     const feed = req.body.feed
     const rate = req.body.rate
@@ -69,7 +69,7 @@ exports.updateFeedBack = async (req, res) => {
         }
         return res.status(400).json({ msg: 'Failed to update review!', success: false })
     } catch (error) {
-        //console.log("error on updateFeedBack: ", error);
+        console.log("error on updateFeedBack: ", error);
         return res.status(500).json({ msg: error.message, err: error, success: false })
     }
 }

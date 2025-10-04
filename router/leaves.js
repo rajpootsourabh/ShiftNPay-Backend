@@ -28,7 +28,7 @@ leaveRouter.post('/reject/:leaveManagementId/:leaveId', verifyToken, rejectLeave
 leaveRouter.get("/holidays",verifyToken, getHolidaysByVendor); // Get holidays for a vendor
 leaveRouter.get("/employee-holidays",verifyToken, getEmployeeHolidaysByVendor); // Get holidays for a vendor
 leaveRouter.post("/holidays", verifyToken,createHoliday); // Create a holiday for a vendor
-leaveRouter.post("/holidays/:id",verifyToken, updateHoliday); // Update holiday for a vendor
+leaveRouter.put("/holidays/:id",verifyToken, updateHoliday); // Update holiday for a vendor
 leaveRouter.delete("/holidays/:id", verifyToken,deleteHoliday); // Delete holiday for a vendor
 
 

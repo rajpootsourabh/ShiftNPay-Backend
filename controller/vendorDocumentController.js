@@ -162,7 +162,7 @@ exports.deleteAssignedDocument = async (req, res) => {
     return res.status(404).json({ message: "Document not found" });
   }
   await AssignedDocument.findOneAndDelete({ _id: id });
-  res.status(200).json({ message: 'Document deleted successfully', status: true });
+  res.status(200).json({ message: 'Document deleted successfully',status:true });
 };
 
 exports.assignDocumentToEmployee = async (req, res) => {
@@ -192,7 +192,7 @@ exports.assignDocumentToEmployee = async (req, res) => {
     res.status(201).json({
       message: 'Documents successfully assigned to the employee!',
       assignedDocuments,
-      status: true
+      status:true
     });
 
   } catch (error) {
@@ -200,4 +200,3 @@ exports.assignDocumentToEmployee = async (req, res) => {
     res.status(500).json({ message: 'Server error' });
   }
 };
-

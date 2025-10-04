@@ -33,10 +33,10 @@ const sendNotification = async (userId, token, title, body, data = {}) => {
                 token: token
             };
 
-            // const response = await admin.messaging().send(message);
-            //console.log('Successfully sent message:', response);
+            const response = await admin.messaging().send(message);
+            console.log('Successfully sent message:', response);
            
-        // return response;
+        return response;
 
         }
         
@@ -46,9 +46,9 @@ const sendNotification = async (userId, token, title, body, data = {}) => {
     }
 };
 
-const getNotificationsByUser = async (userId,limit =20) => {
+const getNotificationsByUser = async (userId) => {
     try {
-        const notifications = await Notification.find({ userId: new mongoose.Types.ObjectId(userId) }).sort({ sentAt: -1 }).limit(limit);
+        const notifications = await Notification.find({ userId: new mongoose.Types.ObjectId(userId) }).sort({ sentAt: -1 });
         return notifications;
     } catch (error) {
         console.error('Error fetching notifications:', error);

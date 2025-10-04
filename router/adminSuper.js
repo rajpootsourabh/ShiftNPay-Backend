@@ -109,7 +109,5 @@ superRouter.post("/modules/isActive", verifyToken, moduleController.setStatus);
 superRouter.get('/vendor/access/:vendorId',verifyToken, moduleController.getVendorAccess);
 superRouter.post('/vendor/access/:vendorId', verifyToken, moduleController.updateVendorAccess);
 
-
-
 superRouter.get('/seedMenuCategories',  moduleController.seedMenuCategories);
 module.exports = superRouter;

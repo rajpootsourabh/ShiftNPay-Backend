@@ -9,7 +9,7 @@ exports.getAllPlans = async (req, res) => {
         }
         return res.status(200).json({ msg: 'Ok', result, success: true })
     } catch (error) {
-        //console.log("error on getAllPlans: ", error);
+        console.log("error on getAllPlans: ", error);
         return res.status(500).json({ msg: error.error, error, success: false })
     }
 }
@@ -23,7 +23,7 @@ exports.getSinglePlans = async (req, res) => {
         }
         return res.status(200).json({ msg: 'Ok', success: true, result })
     } catch (error) {
-        //console.log("error on getSinglePlans: ", error);
+        console.log("error on getSinglePlans: ", error);
         return res.status(500).json({ msg: error.error, error, success: false })
     }
 }
@@ -52,7 +52,7 @@ exports.addAndUpdateOfPlan = async (req, res) => {
         }
         return res.status(400).json({ msg: `Failed to add plan!`, success: false })
     } catch (error) {
-        //console.log("error on addAndUpdateOfPlan: ", error);
+        console.log("error on addAndUpdateOfPlan: ", error);
         return res.status(500).json({ msg: error.error, error, success: false })
     }
 }
@@ -69,7 +69,7 @@ exports.deletePlanById = async (req, res) => {
         }
         return res.status(200).json({ msg: `Plan deleted successfully.`, success: true })
     } catch (error) {
-        //console.log("error on deletePlanById: ", error);
+        console.log("error on deletePlanById: ", error);
         return res.status(500).json({ msg: error.error, error, success: false })
     }
 }

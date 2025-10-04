@@ -23,10 +23,6 @@ const InvoiceSchema = new mongoose.Schema(
             type: String,
             required: true,
         },
-        rate:{
-            type:Number,
-            default:0
-        }
     },
     { timestamps: true }
 );

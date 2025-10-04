@@ -27,11 +27,11 @@ const salt = process.env.SALT
 
 exports.register = async (req, res) => {
 
-    const email = req.query.email
-    const password = req.query.password
+    const email = req.body.email
+    const password = req.body.password
 
     try {
-        const hassPass = await bcrypt.hashSync(password, parseInt(10))
+        const hassPass = await bcrypt.hashSync(password, parseInt(salt))
         const result = await Admin.create({ email: email, password: hassPass })
         if (!result) {
             return res.status(400).json({ msg: 'Faild to register super admin!', success: false })
@@ -165,12 +165,12 @@ exports.getEmployeesByVendor = async (req, res) => {
         const employees = await Employee.find(
             { userId: vendorId },
             {
-                _id: 1,  
+                _id: 1, // include other fields if necessary
                 newWayName: { $concat: ["$firstName", " ", "$lastName"] },
                 name:1,
                 empId: 1, 
                 ssnNo: 1,
-                
+                // Add other fields as needed
             }
         ); // Find employees by vendorId
         if (employees.length > 0) {

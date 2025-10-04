@@ -14,7 +14,7 @@ exports.getStateByVendorId = async (req, res) => {
         }
         return res.status(404).json({ msg: 'No states found!', success: false })
     } catch (error) {
-        //console.log("error on getStateByVendorIds: ", error);
+        console.log("error on getStateByVendorIds: ", error);
         return res.status(500).json({ msg: error.message, err: error, success: false })
     }
 }
@@ -28,13 +28,13 @@ exports.getSingleStateById = async (req, res) => {
         }
         return res.status(404).json({ msg: 'State not found!', success: false })
     } catch (error) {
-        //console.log("error on getSingleStateById: ", error);
+        console.log("error on getSingleStateById: ", error);
         return res.status(500).json({ msg: error.message, err: error, success: false })
     }
 }
 
 exports.addState = async (req, res) => {
-    // //console.log("req.body: ", req.body);
+    // console.log("req.body: ", req.body);
 
     const userId = req.body.userId
     const name = req.body.name;
@@ -57,7 +57,7 @@ exports.addState = async (req, res) => {
         }
         return res.status(400).json({ msg: 'Failed to add state!', success: false })
     } catch (error) {
-        //console.log("error on addState: ", error);
+        console.log("error on addState: ", error);
         return res.status(500).json({ msg: error.message, err: error, success: false })
     }
 }
@@ -80,7 +80,7 @@ exports.updateState = async (req, res) => {
         }
         return res.status(400).json({ msg: 'Failed to update state!', success: false })
     } catch (error) {
-        //console.log("error on updateState: ", error);
+        console.log("error on updateState: ", error);
         return res.status(500).json({ msg: error.message, err: error, success: false })
     }
 }
@@ -98,7 +98,7 @@ exports.deleteState = async (req, res) => {
         }
         return res.status(400).json({ msg: 'Failed to delete state!', success: false })
     } catch (error) {
-        //console.log("error on deleteState: ", error);
+        console.log("error on deleteState: ", error);
         return res.status(500).json({ msg: error.message, err: error, success: false })
     }
 }

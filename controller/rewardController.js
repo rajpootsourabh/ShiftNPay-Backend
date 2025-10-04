@@ -343,11 +343,6 @@ exports.approveRedemption = async (req, res) => {
     reward.redeemedAt = new Date();
     await reward.save();
 
-    let employee = await Employee.findById({ _id: redemption.employeeId });
-    let vendor = await User.findById({ _id: adminId });
-
-    await Services.NotificationService.sendNotification(employee._id, employee.device_token, 'Request Approved!', `${vendor.name} has Approved your redeem request.`);
-
     res.json({
       success: true,
       message: 'Redemption request approved successfully',
@@ -388,10 +383,7 @@ exports.rejectRedemption = async (req, res) => {
         message: 'Redemption request not found'
       });
     }
-    let employee = await Employee.findById({ _id: redemption.employeeId });
-    let vendor = await User.findById({ _id: adminId });
 
-    await Services.NotificationService.sendNotification(employee._id, employee.device_token, 'Request Rejected!', `${vendor.name} has Rejected your redeem request.`);
     res.json({
       success: true,
       message: 'Redemption request rejected',
@@ -411,7 +403,7 @@ exports.getEmployeeRewards = async (req, res) => {
     const employeeId = req.params.employeeId;
 
     const [earnedRewards, redemptionRequests, donationRequests] = await Promise.all([
-      WeeklyReward.find({ employeeId, status: { $in: ['approved', 'processed'] }, }).sort({ weekStartDate: -1 }).lean(),
+      WeeklyReward.find({ employeeId  , status: { $in: ['approved', 'processed'] },}).sort({ weekStartDate: -1 }).lean(),
       RewardRedemption.find({
         employeeId,
         status: { $in: ['approved', 'processed'] },
@@ -493,6 +485,8 @@ exports.getEmployeeRewards = async (req, res) => {
     });
   }
 };
+
+
 exports.redeemReward = async (req, res) => {
   try {
     const reward = await WeeklyReward.findOneAndUpdate(

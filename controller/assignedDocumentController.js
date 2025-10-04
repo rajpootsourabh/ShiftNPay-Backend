@@ -132,7 +132,7 @@ exports.uploadDoucmentByEmployee = async (req, res) => {
         return res.status(404).json({ success: false, msg: "Document not found for the assigned vendor" });
       }
 
-          let employee = await Employee.findById({ _id: emploeeId });
+      let employee = await Employee.findById({ _id: emploeeId });
           let vendor = await User.findById({ _id: updatedDocument?.assignedBy?._id });
       
           await Services.NotificationService.sendNotification(vendor._id, vendor.device_token, 'New Document Submitted!', `${employee.name} has Submitted  you a document.`);

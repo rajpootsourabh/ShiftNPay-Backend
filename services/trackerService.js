@@ -13,36 +13,59 @@ const canStartTimer = async (jobId, empId) => {
             throw new Error('Shift not assigned to this job');
         }
 
-        const currentTime = new Date();
+        const now = new Date();
         const shiftStart = new Date(job.shift.start);
         const shiftEnd = new Date(job.shift.end);
+        console.log('shiftStart :',shiftStart)
+        console.log('shiftEnd :',shiftEnd)
+        console.log('now :',now)
+        const currentHours = now.getHours();
+        const currentMinutes = now.getMinutes();
+        const startHours = shiftStart.getHours();
+        const startMinutes = shiftStart.getMinutes();
+        const endHours = shiftEnd.getHours();
+        const endMinutes = shiftEnd.getMinutes();
 
-        const currentHours = currentTime.getUTCHours();
-        const currentMinutes = currentTime.getUTCMinutes();
-        const shiftStartHours = shiftStart.getUTCHours();
-        const shiftStartMinutes = shiftStart.getUTCMinutes();
-        const shiftEndHours = shiftEnd.getUTCHours();
-        const shiftEndMinutes = shiftEnd.getUTCMinutes();
+        const currentTotal = currentHours * 60 + currentMinutes;
+        const startTotal = startHours * 60 + startMinutes;
+        const endTotal = endHours * 60 + endMinutes;
 
-        const currentTotalMinutes = currentHours * 60 + currentMinutes;
-        const shiftStartTotalMinutes = shiftStartHours * 60 + shiftStartMinutes;
-        const shiftEndTotalMinutes = shiftEndHours * 60 + shiftEndMinutes;
+        // Check if dates are different (overnight shift)
+        const isOvernight = shiftStart.getDate() !== shiftEnd.getDate();
 
-        if (currentTotalMinutes >= shiftStartTotalMinutes && currentTotalMinutes <= shiftEndTotalMinutes) {
-            return { isAllowed: true }; // Allow job start
+        let isWithinShift;
+        if (isOvernight) {
+            // For overnight shifts, valid if current time is after start OR before end
+            isWithinShift = currentTotal >= startTotal || currentTotal <= endTotal;
+        } else {
+            // For same-day shifts, valid if between start and end
+            isWithinShift = currentTotal >= startTotal && currentTotal <= endTotal;
+        }
+
+        if (isWithinShift) {
+            return { isAllowed: true };
         }
 
         return { 
             start: job.shift.start, 
             end: job.shift.end, 
             isAllowed: false, 
-            message: "You cannot start the job." 
+            message: "You cannot start the job. As you shift is not started."
         };
 
     } catch (error) {
         throw new Error(error.message);
     }
 };
+
+// // Helper function to format time as "HH:MM AM/PM"
+// function formatTime(date) {
+//     return date.toLocaleTimeString('en-US', { 
+//         hour: '2-digit', 
+//         minute: '2-digit',
+//         hour12: true 
+//     });
+// }
 
 module.exports = {
     canStartTimer

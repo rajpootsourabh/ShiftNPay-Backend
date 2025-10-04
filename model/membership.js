@@ -30,19 +30,6 @@ const membershipSchema = new Schema(
       type: String,
       required: false,
     },
-    stripePlanId: {
-      type: String,
-      required: false, // This will be set after creating the plan in Stripe
-    },
-
-    stripeProductId: {
-      type: String,
-      required: false, // This will be set after creating the plan in Stripe
-    },
-    trialPeriodDays: {
-      type: Number,
-      default: 30, // Default to 30 days trial period
-    },
   },
   {
     timestamps: true,

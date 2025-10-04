@@ -13,6 +13,7 @@ const MedicationController = require('./../controller/IDB_SYS/Client/Medication'
 const NeedController = require('./../controller/IDB_SYS/Client/Need');
 const OtherNoteTypeController = require('./../controller/IDB_SYS/Client/OtherNoteType');
 const ReasonController = require('./../controller/IDB_SYS/Client/Reason');
+const ReferralSourceController = require("../controller/IDB_SYS/Client/ReferralSource");
 const RelationshipController = require('./../controller/IDB_SYS/Client/Relationship');
 const SalesRepController = require('./../controller/IDB_SYS/Client/SalesRep');
 const ReminderListController = require('./../controller/IDB_SYS/Client/ReminderList');
@@ -92,6 +93,13 @@ router.get('/reason/single/:id', authMiddleware.employer, ReasonController.getRe
 router.post('/reason', authMiddleware.employer, ReasonController.createReason);
 router.put('/reason/:id', authMiddleware.employer, ReasonController.updateReason);
 router.delete('/reason/:id', authMiddleware.employer, ReasonController.deleteReason);
+
+// Referral Sources Routes
+router.get("/referral-sources", authMiddleware.employer, ReferralSourceController.getReferralSources);
+router.get("/referral-sources/:id", authMiddleware.employer, ReferralSourceController.getReferralSourceById);
+router.post("/referral-sources", authMiddleware.employer, ReferralSourceController.createReferralSource);
+router.put("/referral-sources/:id", authMiddleware.employer, ReferralSourceController.updateReferralSource);
+router.delete("/referral-sources/:id", authMiddleware.employer, ReferralSourceController.deleteReferralSource)
 
 router.get('/relationship', authMiddleware.employer, RelationshipController.getRelationshipByVendor);
 router.get('/relationship/single/:id', authMiddleware.employer, RelationshipController.getRelationshipById);

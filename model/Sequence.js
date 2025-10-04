@@ -10,7 +10,7 @@ const Sequence = mongoose.model('Sequence', SequenceSchema);
 exports.getNextSequenceValue = async (sequenceName) => {
     const sequence = await Sequence.findByIdAndUpdate(
         sequenceName,
-        { $inc: { sequence_value: 1231 } },
+        { $inc: { sequence_value: 1 } },
         { new: true, upsert: true }
     );
     return sequence.sequence_value;

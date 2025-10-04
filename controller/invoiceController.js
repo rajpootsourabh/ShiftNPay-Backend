@@ -8,7 +8,7 @@ const { sendInvoiceMail } = require("../util/mailService");
 exports.createInvoice = async (req, res) => {
   try {
     const { email, sender, status, name } = req.body;
-    //console.log('req.body ' , req.body)
+    console.log('req.body ' , req.body)
         let userId =  req.payload.reqUserId;
     if (!req.files || !req.files.file) {
       return res.status(400).json({ success: false, message: "Invoice file is required" });
@@ -46,6 +46,7 @@ exports.createInvoice = async (req, res) => {
   }
 };
 
+// Get all invoices
 exports.getInvoices = async (req, res) => {
   try {
     let vendorId =  req.payload.reqUserId;
@@ -56,6 +57,7 @@ exports.getInvoices = async (req, res) => {
   }
 };
 
+// Get a single invoice by ID
 exports.getInvoiceById = async (req, res) => {
   try {
     const invoice = await Invoice.findById(req.params.id);

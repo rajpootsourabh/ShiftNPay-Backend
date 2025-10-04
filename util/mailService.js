@@ -325,6 +325,7 @@ exports.shiftStartReminderToEmployee = async (employee, title,jobName,time) => {
                 pass: "jifaruninpbzszne",
             },
             tls: {
+                // do not fail on invalid certs
                 rejectUnauthorized: false,
             },
         })
@@ -332,6 +333,7 @@ exports.shiftStartReminderToEmployee = async (employee, title,jobName,time) => {
         let info = await transporter.sendMail({
             from: 'shiftnpay@gmail.com',
             to: employee.email,
+            // to: 'vinaybhardaj@gmail.com',
             subject: title,
             html: htmlContent.replace('{{name}}', employee.email).replace('{{shiftName}}', jobName), 
         })
