@@ -1,3 +1,6 @@
-/node_modules
-/shipnpay/node_modules
-.env
+/node_modules      # ignore node_modules completely
+.env               # ignore environment variables
+asset/Uploads/*    # ignore everything inside asset/Uploads
+!asset/Uploads/.gitkeep  # except the .gitkeep file (so Git keeps the folder)
+assets/*           # ignore everything inside assets/
+!assets/.gitkeep   # except the .gitkeep file
