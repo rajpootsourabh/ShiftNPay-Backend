@@ -1,6 +1,51 @@
-/node_modules      # ignore node_modules completely
-.env               # ignore environment variables
-asset/Uploads/*    # ignore everything inside asset/Uploads
-!asset/Uploads/.gitkeep  # except the .gitkeep file (so Git keeps the folder)
-assets/*           # ignore everything inside assets/
-!assets/.gitkeep   # except the .gitkeep file
+# Dependencies
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Environment variables
+.env
+.env.*
+!.env.example
+
+# Uploads and assets
+asset/Uploads/*
+!asset/Uploads/.gitkeep
+
+assets/*
+!assets/.gitkeep
+
+# Deployment scripts
+deploy.ps1
+*.ps1
+deploy.sh
+
+# Build outputs
+build/
+dist/
+
+# Logs
+*.log
+logs/
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
