@@ -27,7 +27,6 @@ const PayorController = require('./../controller/IDB_SYS/Client/Payor');
 const scheduleController = require('./../controller/IDB_SYS/Schedule/scheduleController');
 const timesheetController = require('./../controller/IDB_SYS/TimeSheet/TimeSheetWeek');
 
-
 router.get('/agency', authMiddleware.employer, agencyController.getAgenciesByVendor);
 router.get('/agency/single/:id', authMiddleware.employer, agencyController.getAgencyById);
 router.post('/agency', authMiddleware.employer, agencyController.createAgency);
@@ -182,5 +181,7 @@ router.patch('/timesheet-weeks/:id/unlock',authMiddleware.employer,timesheetCont
 router.post('/timesheet-weeks/recreate',authMiddleware.employer,timesheetController.updateWeek);
 router.post( '/timesheet-weeks/fetch-schedules',authMiddleware.employer,timesheetController.fetchWeeklySchedules);
 
+router.post('/client/:clientId/upload', authMiddleware.employer, ClientController.uploadClientAttachment);
+router.delete('/client/:clientId/attachment/:attachmentId', authMiddleware.employer, ClientController.deleteClientAttachment);
 
 module.exports = router;

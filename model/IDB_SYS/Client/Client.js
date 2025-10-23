@@ -134,8 +134,23 @@ const clientSchema = new mongoose.Schema(
     requireCaregiverSignature: Boolean,
     requireClientSignature: Boolean,
 
-    // Attachments
-    attachments: [mongoose.Schema.Types.Mixed],
+    // Updated attachments field - no more base64
+    attachments: [
+      {
+        description: String,
+        fileName: String, // Stored filename
+        originalName: String, // Original filename
+        url: String, // URL to access the file
+        fileSize: Number,
+        fileType: String,
+        uploadedAt: { type: Date, default: Date.now },
+        clientAccess: {
+          type: String,
+          enum: ["restricted", "view", "download"],
+          default: "restricted",
+        },
+      },
+    ],
 
     // Notes access
     careNotesAccess: String,
