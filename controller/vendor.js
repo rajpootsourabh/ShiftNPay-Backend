@@ -212,10 +212,10 @@ exports.updateProfileUpdate = async (req, res) => {
     const id = req.body._id
 
     try {
-        // //console.log("name: ", name);
-        // //console.log("email: ", email);
-        // //console.log("address: ", address);
-        // //console.log("id: ", id);
+        //console.log("name: ", name);
+        //console.log("email: ", email);
+        //console.log("address: ", address);
+        //console.log("id: ", id);
         const checkUser = await User.findById(id)
         if (!checkUser) {
             return res.status(403).json({ msg: 'Access Forbidden!', success: false })
@@ -1648,6 +1648,16 @@ exports.getEmployeeList = async (req, res) => {
         return res.status(500).json({ msg: error.message, err: error, success: false });
     }
 }
+
+// exports.getEmployeeList = async (req, res) => {
+//     try {
+//         const result = await Employee.find({ userId: req.user._id }); // <-- find, not FindOne
+//         return res.status(200).json({ msg: "Ok", success: true, result });
+//     } catch (error) {
+//         return res.status(500).json({ msg: error.message, err: error, success: false });
+//     }
+// };
+
 
 
 exports.getProfile = async (req, res) => {

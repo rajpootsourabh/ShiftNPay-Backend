@@ -10,9 +10,7 @@ class FileUploadService {
     // Ensure directory exists
     if (!fs.existsSync(this.basePath)) {
       fs.mkdirSync(this.basePath, { recursive: true });
-      console.log(`✅ Created directory: ${this.basePath}`);
-    } else {
-      console.log(`✅ Directory exists: ${this.basePath}`);
+      //console.log(`Created directory: ${this.basePath}`);
     }
   }
 

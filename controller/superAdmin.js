@@ -532,49 +532,72 @@ exports.updateMembershipPlan = async (req, res) => {
     try {
         const { title, price, type, paymentTerm, planDate, description } = req.body;
 
-        // Find the existing membership
+        // 1️⃣ Find the existing membership
         const membership = await Membership.findById(req.params.id);
         if (!membership) {
             return res.status(404).json({ message: 'Membership not found.' });
         }
 
-        // Update the membership details in MongoDB
-        const updatedMembership = await Membership.findByIdAndUpdate(
-            req.params.id,
-            { title, price, type, paymentTerm, planDate, description },
-            { new: true, runValidators: true }
-        );
+        // 2️⃣ If no Stripe product exists → create one
+        let stripeProductId = membership.stripeProductId;
+        let stripePlanId = membership.stripePlanId;
 
-        // Update the product in Stripe
-        await stripe.products.update(membership.stripeProductId, {
-            name: title,
-            description,
-        });
+        if (!stripeProductId) {
+            const product = await stripe.products.create({
+                name: title,
+                description
+            });
+            stripeProductId = product.id;
+        } else {
+            // Update existing product if it exists
+            await stripe.products.update(stripeProductId, {
+                name: title,
+                description
+            });
+        }
 
-        // Create a new price in Stripe
+        // 3️⃣ Create a new price in Stripe
         const newPrice = await stripe.prices.create({
-            unit_amount: price * 100, // amount in cents
+            unit_amount: price * 100, // cents
             currency: 'usd',
             recurring: {
                 interval: mapPaymentTermToStripeInterval(paymentTerm),
-                interval_count: paymentTerm === 'Quarterly' ? 3 : 1 // Adjust interval count for quarterly
+                interval_count: paymentTerm === 'Quarterly' ? 3 : 1
             },
-            product: membership.stripeProductId,
+            product: stripeProductId,
         });
 
-        // Optionally, you might want to delete the old price if no longer needed
-        if (membership.stripePlanId) {
-            await stripe.prices.update(membership.stripePlanId, { active: false });
+        // 4️⃣ Deactivate old price if exists
+        if (stripePlanId) {
+            await stripe.prices.update(stripePlanId, { active: false });
         }
 
-        // Update membership with the new price ID
-        await Membership.findByIdAndUpdate(req.params.id, { stripePlanId: newPrice.id });
+        // 5️⃣ Update MongoDB
+        const updatedMembership = await Membership.findByIdAndUpdate(
+            req.params.id,
+            {
+                title,
+                price,
+                type,
+                paymentTerm,
+                planDate,
+                description,
+                stripeProductId,
+                stripePlanId: newPrice.id
+            },
+            { new: true, runValidators: true }
+        );
 
-        res.status(200).json({ message: 'Membership updated successfully!', membership: updatedMembership });
+        res.status(200).json({
+            message: 'Membership updated successfully!',
+            membership: updatedMembership
+        });
     } catch (error) {
+        console.error('Error updating membership:', error);
         res.status(500).json({ message: 'Failed to update membership.', error: error.message });
     }
 };
+
 
 // Helper function to map paymentTerm to Stripe's interval
 const mapPaymentTermToStripeInterval = (paymentTerm) => {
@@ -805,6 +828,7 @@ exports.updateAdminProfile = async (req, res) => {
 exports.getProfile = async (req, res) => {
     const { reqUserId } = req.payload;
     try {
+        console.log(reqUserId)
         const admin = await Admin.findOne({ _id: reqUserId });
 
         if (!admin) {
@@ -898,57 +922,70 @@ exports.notificationsMarkAllAsRead = async (req, res) => {
 }
 
 exports.updateTrackingTimeByAdmin = async (req, res) => {
-    const { jobId, startTime, endTime, date } = req.body;
-    try {
-        const SECONDS_IN_AN_HOUR = 3600;
-        const MAX_REGULAR_HOURS_IN_SECONDS = 40 * SECONDS_IN_AN_HOUR; // 40 hours in seconds
-        const startOfDay = new Date(date).setHours(0, 0, 0, 0);
-        const endOfDay = new Date(date).setHours(23, 59, 59, 999);
-        let tracking = await Tracking.findOne({
-            jobId,
-            sessionDate: { $gte: startOfDay, $lte: endOfDay }
-        });
+  const { jobId, startTime, endTime, date } = req.body;
 
-        
-        // Calculate elapsed time in seconds between updated startTime and stoppedTime
-        const timeElapsedInSeconds = (new Date(endTime).getTime() - new Date(startTime).getTime()) / 1000;
-
-        tracking.elapsedTime = timeElapsedInSeconds;
-
-
-        const checkEmp = await Employee.findOne({ _id: tracking.userId });
-        if (!checkEmp) {
-            return res.status(404).json({ msg: "Employee data not found!", success: false });
-        }
-
-
-        // Calculate total worked time for the week
-        const totalWorkedSeconds = Math.floor(tracking.elapsedTime);
-
-        let amount = 0;
-        if (totalWorkedSeconds <= MAX_REGULAR_HOURS_IN_SECONDS) {
-            amount = calculateEarnings(checkEmp.rate, totalWorkedSeconds);
-        } else {
-            const extraTimeWorked = totalWorkedSeconds - MAX_REGULAR_HOURS_IN_SECONDS;
-            const Overtimepayment = calculateEarnings(checkEmp.overTimeRate, extraTimeWorked);
-            amount = Number(amount) + Number(Overtimepayment);
-        }
-
-        tracking.startTime = startTime;
-        tracking.stoppedTime = endTime;
-        tracking.amount = amount;
-        await tracking.save();
-
-        return res.status(200).json({
-            msg: "Tracking time updated successfully",
-            success: true,
-            tracking
-        });
-    } catch (error) {
-        console.error('Error updating tracking time:', error);
-        return res.status(500).json({ error: 'Server error occurred while updating tracking.' });
+  try {
+    if (!date) {
+      return res.status(400).json({ msg: "Missing date field in request body", success: false });
     }
+
+    const parsedDate = new Date(date);
+    if (isNaN(parsedDate.getTime())) {
+      return res.status(400).json({ msg: "Invalid date format", success: false });
+    }
+
+    const startOfDay = new Date(parsedDate.setHours(0, 0, 0, 0));
+    const endOfDay = new Date(parsedDate.setHours(23, 59, 59, 999));
+
+    const tracking = await Tracking.findOne({
+      jobId,
+      sessionDate: { $gte: startOfDay, $lte: endOfDay },
+    });
+
+    if (!tracking) {
+      return res.status(404).json({ msg: "Tracking record not found for this job & date", success: false });
+    }
+
+    // Calculate elapsed time in seconds
+    const timeElapsedInSeconds = (new Date(endTime) - new Date(startTime)) / 1000;
+    tracking.elapsedTime = timeElapsedInSeconds;
+
+    const checkEmp = await Employee.findById(tracking.userId);
+    if (!checkEmp) {
+      return res.status(404).json({ msg: "Employee data not found!", success: false });
+    }
+
+    const SECONDS_IN_AN_HOUR = 3600;
+    const MAX_REGULAR_HOURS_IN_SECONDS = 40 * SECONDS_IN_AN_HOUR;
+    const totalWorkedSeconds = Math.floor(tracking.elapsedTime);
+
+    let amount = 0;
+    if (totalWorkedSeconds <= MAX_REGULAR_HOURS_IN_SECONDS) {
+      amount = calculateEarnings(checkEmp.rate, totalWorkedSeconds);
+    } else {
+      const extraTimeWorked = totalWorkedSeconds - MAX_REGULAR_HOURS_IN_SECONDS;
+      amount = calculateEarnings(checkEmp.rate, MAX_REGULAR_HOURS_IN_SECONDS) +
+               calculateEarnings(checkEmp.overTimeRate, extraTimeWorked);
+    }
+
+    tracking.startTime = startTime;
+    tracking.stoppedTime = endTime;
+    tracking.amount = amount;
+
+    await tracking.save();
+
+    return res.status(200).json({
+      msg: "Tracking time updated successfully",
+      success: true,
+      tracking,
+    });
+
+  } catch (error) {
+    console.error("Error updating tracking time:", error);
+    return res.status(500).json({ error: "Server error occurred while updating tracking." });
+  }
 };
+
 
 exports.getDocuments = async (req, res) => {
     try {

@@ -90,6 +90,7 @@ vendorRouter.get("/documents/download/:id", verifyToken, downloadSubmittedDocume
 
 
 vendorRouter.get('/employees', authMiddleware.employee, getEmployeeList);
+// vendorRouter.get('/employees', authMiddleware.employer, getEmployeeList);
 vendorRouter.get('/categories/allowed', authMiddleware.employer, getVendorCategoryAccess);
 
 

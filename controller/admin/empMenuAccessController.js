@@ -3,6 +3,7 @@ const { empMenuItems } = require('../../config/menuCategories');
 const Employee = require('../../model/Employee');
 const EmployeeMenuAccess = require('../../model/EmployeeMenuAccess');
 
+
 // Helper function to get all main category titles
 const getMainCategories = () => {
   return empMenuItems.map(category => category.title);
@@ -10,7 +11,7 @@ const getMainCategories = () => {
 
 exports.getProductCategory = async (req, res) => {
   try {
-    console.log(empMenuItems , ' empMenuItems')
+    // console.log(empMenuItems , ' empMenuItems')
     const categories = empMenuItems.map(category => ({
       title: category.name,
     }));
