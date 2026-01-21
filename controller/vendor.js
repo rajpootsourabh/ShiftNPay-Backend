@@ -126,39 +126,73 @@ exports.registerVendorFromAdmin = async (req, res) => {
 
 
 exports.loginVendor = async (req, res) => {
-    // //console.log("req.body: ", req.body);
-    const email = req.body.email
-    const password = req.body.password
+  try {
+    const { email, password } = req.body; // ← plain password from login
 
-
-    try {
-        const checkVendor = await User.findOne({ email: email });
-        if (!checkVendor) {
-            return res.status(404).json({ msg: `User not found! Please register first.`, success: false })
-        }
-        if (!checkVendor.status) {
-            return res.status(404).json({ msg: `Please wait for approval.`, success: false })
-        }
-
-        const matchPass = await bcrypt.compare(password, checkVendor.password)
-        if (!matchPass) {
-            return res.status(400).json({ msg: 'Email or Password are incorrect!', success: false })
-        }
-        const token = createToken({ _id: checkVendor._id, email: checkVendor.email, name: checkVendor.name, address: checkVendor.address ,role :'vendor' })
-        if (!token) {
-            return res.status(400).json({ msg: 'Failed to create token!', success: false })
-        }
-        await LoginLog.create({
-            userId: checkVendor._id,
-            ipAddress: req.ip,
-            userAgent: req.headers['user-agent'],
-        });
-        return res.status(200).json({ msg: 'Ok', success: true, result: checkVendor, token })
-    } catch (error) {
-        //console.log("error on loginVendor: ", error);
-        return res.status(500).json({ msg: error.message, err: error, success: false })
+    // 1️⃣ Find vendor by email
+    const checkVendor = await User.findOne({ email });
+    if (!checkVendor) {
+      return res.status(400).json({
+        msg: "Invalid email or password",
+        success: false,
+      });
     }
-}
+
+    // 2️⃣ Check approval status
+    if (!checkVendor.status) {
+      return res.status(403).json({
+        msg: "Please wait for approval",
+        success: false,
+      });
+    }
+
+    // 3️⃣ 🔐 CHECK PLAIN PASSWORD AGAINST HASHED PASSWORD (DB)
+    const isPasswordValid = await bcrypt.compare(
+      password,               // 👈 plain password (login input)
+      checkVendor.password     // 👈 hashed password (from DB)
+    );
+
+    if (!isPasswordValid) {
+      return res.status(400).json({
+        msg: "Invalid email or password",
+        success: false,
+      });
+    }
+
+    // 4️⃣ Create token
+    const token = createToken({
+      _id: checkVendor._id,
+      email: checkVendor.email,
+      name: checkVendor.name,
+      address: checkVendor.address,
+      role: "vendor",
+    });
+
+    // 5️⃣ Log login activity
+    await LoginLog.create({
+      userId: checkVendor._id,
+      ipAddress: req.ip,
+      userAgent: req.headers["user-agent"],
+    });
+
+    // 6️⃣ Remove password before sending response
+    const { password: _, ...safeVendor } = checkVendor.toObject();
+
+    return res.status(200).json({
+      msg: "Login successful",
+      success: true,
+      result: safeVendor,
+      token,
+    });
+
+  } catch (error) {
+    return res.status(500).json({
+      msg: error.message,
+      success: false,
+    });
+  }
+};
+
 
 
 // uploading image of profile
