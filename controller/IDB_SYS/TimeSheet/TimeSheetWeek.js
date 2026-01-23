@@ -269,7 +269,7 @@ exports.fetchWeeklySchedules = async (req, res) => {
       .populate("service", "name code")
       .sort({ start: 1 });
 
-    console.log("Found schedules:", schedules.length);
+    // console.log("Found schedules:", schedules.length);
 
     // Extract service IDs (job IDs) for tracking lookup
     const serviceIds = schedules.map((schedule) => schedule.service._id);
@@ -364,7 +364,7 @@ exports.fetchWeeklySchedules = async (req, res) => {
       );
     });
 
-    console.log("Schedules with tracking data:", schedulesWithTracking.length);
+    // console.log("Schedules with tracking data:", schedulesWithTracking.length);
 
     // Format the response
     const formattedSchedules = schedulesWithTracking.map((schedule) => {

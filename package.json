@@ -5,7 +5,9 @@
   "main": "index.js",
   "scripts": {
     "start": "nodemon run index.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "seed:service-codes": "node seedServiceCodes.js",
+    "seed:service-codes:dry-run": "node seedServiceCodes.js --dry-run"
   },
   "author": "Abdul Karim Anasri",
   "license": "ISC",
