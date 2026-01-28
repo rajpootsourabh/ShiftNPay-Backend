@@ -271,8 +271,11 @@ exports.fetchWeeklySchedules = async (req, res) => {
 
     // console.log("Found schedules:", schedules.length);
 
+    // Filter out schedules with null/missing service references (orphaned data)
+    const validSchedules = schedules.filter((schedule) => schedule.service && schedule.service._id);
+
     // Extract service IDs (job IDs) for tracking lookup
-    const serviceIds = schedules.map((schedule) => schedule.service._id);
+    const serviceIds = validSchedules.map((schedule) => schedule.service._id);
 
     // **FIX: Fetch tracking data ONLY for the specific week date range**
     const trackingData = await Models.Tracking.aggregate([
@@ -356,7 +359,9 @@ exports.fetchWeeklySchedules = async (req, res) => {
     });
 
     // Filter out schedules that don't have any tracking entries
-    const schedulesWithTracking = schedules.filter((schedule) => {
+    // Also ensure schedule.service exists (null check for orphaned references)
+    const schedulesWithTracking = validSchedules.filter((schedule) => {
+      if (!schedule.service || !schedule.service._id) return false;
       const serviceIdStr = schedule.service._id.toString();
       return (
         trackingMap[serviceIdStr] &&
