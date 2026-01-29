@@ -179,6 +179,7 @@ router.get('/timesheet-weeks',authMiddleware.employer,timesheetController.getAll
 router.patch('/timesheet-weeks/:id/lock',authMiddleware.employer,timesheetController.lockWeek);
 router.patch('/timesheet-weeks/:id/unlock',authMiddleware.employer,timesheetController.unlockWeek);
 router.post('/timesheet-weeks/recreate',authMiddleware.employer,timesheetController.updateWeek);
+router.delete('/timesheet-weeks/:id',authMiddleware.employer,timesheetController.deleteWeek);
 router.post( '/timesheet-weeks/fetch-schedules',authMiddleware.employer,timesheetController.fetchWeeklySchedules);
 
 router.post('/client/:clientId/upload', authMiddleware.employer, ClientController.uploadClientAttachment);

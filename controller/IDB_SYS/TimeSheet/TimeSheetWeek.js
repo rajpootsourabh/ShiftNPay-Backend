@@ -174,14 +174,22 @@ exports.unlockWeek = async (req, res) => {
   }
 };
 
-// 7. Delete week (only if unlocked)
+// 7. Delete week (only if unlocked and owned by vendor)
 exports.deleteWeek = async (req, res) => {
   try {
     const { id } = req.params;
+    const vendorId = req.user._id;
+    
     const week = await Models.TimesheetWeek.findById(id);
 
     if (!week) return res.status(404).json({ message: "Week not found" });
-    if (week.locked)
+    
+    // Verify vendor ownership
+    if (week.vendorId.toString() !== vendorId.toString()) {
+      return res.status(403).json({ message: "Not authorized to delete this week" });
+    }
+    
+    if (week.isLocked)
       return res.status(400).json({ message: "Cannot delete a locked week" });
 
     await Models.TimesheetWeek.findByIdAndDelete(id);
