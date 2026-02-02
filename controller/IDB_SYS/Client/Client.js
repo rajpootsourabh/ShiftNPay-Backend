@@ -155,9 +155,6 @@ exports.createClient = async (req, res) => {
     }
   } catch (err) {
     console.error('Error in createClient:', err);
-    if (err.code === 11000 && err.keyPattern?.email) {
-      return res.status(400).json({ message: "Email already exists" });
-    }
     res.status(400).json({ message: err.message });
   }
 };
@@ -196,9 +193,6 @@ exports.updateClient = async (req, res) => {
     res.json(client);
   } catch (err) {
     console.error('Error in updateClient:', err);
-    if (err.code === 11000 && err.keyPattern.email) {
-      return res.status(400).json({ message: "Email already exists" });
-    }
     res.status(400).json({ message: err.message });
   }
 };
