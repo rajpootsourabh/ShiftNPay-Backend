@@ -130,6 +130,7 @@ const clientSchema = new mongoose.Schema(
 
     // Documentation preferences
     enableClientSpecific1500: Boolean,
+    enableUB04: Boolean,
     cms1500Version: String,
     requireCaregiverSignature: Boolean,
     requireClientSignature: Boolean,
