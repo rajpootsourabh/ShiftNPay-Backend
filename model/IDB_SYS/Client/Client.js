@@ -208,6 +208,10 @@ const clientSchema = new mongoose.Schema(
     // Needs assessment
     needsMasterList: [mongoose.Schema.Types.Mixed],
     assignedNeeds: [mongoose.Schema.Types.Mixed],
+    clientNeeds: [{
+      needId: Number,
+      required: Boolean
+    }],
     notes: [mongoose.Schema.Types.Mixed],
 
     // Medication administration

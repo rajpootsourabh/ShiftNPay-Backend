@@ -2,13 +2,63 @@ const Models = require("./../../../model/index");
 const mongoose = require('mongoose');
 const { ObjectId } = mongoose.Types;
 
+// Helper function to check if a date range overlaps with any approved interruption
+const checkClientInterruptions = async (clientId, startDate, endDate) => {
+  const client = await Models.Client.findById(clientId);
+  if (!client || !client.interruptions || !Array.isArray(client.interruptions)) {
+    return { blocked: false };
+  }
 
+  const scheduleStart = new Date(startDate);
+  const scheduleEnd = new Date(endDate);
+
+  for (const interruption of client.interruptions) {
+    // Only check approved interruptions
+    if (interruption.status !== 'approved') continue;
+
+    const intStart = new Date(interruption.startDate);
+    const intEnd = new Date(interruption.endDate);
+
+    // Check if schedule dates overlap with interruption dates
+    if (scheduleStart <= intEnd && scheduleEnd >= intStart) {
+      return {
+        blocked: true,
+        interruption: {
+          startDate: interruption.startDate,
+          endDate: interruption.endDate,
+          type: interruption.type,
+          reason: interruption.reason
+        }
+      };
+    }
+  }
+
+  return { blocked: false };
+};
 
 // Create new schedule
 exports.createSchedule = async (req, res) => {
   try {
     const scheduleData = req.body;
     const vendorId = req.user._id;
+
+    // Check for client interruptions (service blocked periods)
+    if (scheduleData.client) {
+      const interruptionCheck = await checkClientInterruptions(
+        scheduleData.client,
+        scheduleData.start || scheduleData.startDate,
+        scheduleData.end || scheduleData.endDate
+      );
+
+      if (interruptionCheck.blocked) {
+        return res.status(403).json({
+          message: `Scheduling blocked: Client has an approved service interruption from ${interruptionCheck.interruption.startDate} to ${interruptionCheck.interruption.endDate}`,
+          reason: interruptionCheck.interruption.reason,
+          type: interruptionCheck.interruption.type,
+          interruptionPeriod: interruptionCheck.interruption
+        });
+      }
+    }
 
     // Check for existing schedule with same client, service, caregiver, and overlapping time
     const existingSchedule = await Models.Schedule.findOne({
@@ -76,7 +126,6 @@ exports.createSchedule = async (req, res) => {
     res.status(400).json({ message: error.message });
   }
 };
-
 
 
 exports.getAllSchedules = async (req, res) => {
@@ -154,6 +203,24 @@ exports.updateSchedule = async (req, res) => {
     const vendorId = req.user._id;
     const scheduleData = req.body;
     const scheduleId = req.params.id;
+
+    // Check for client interruptions (service blocked periods)
+    if (scheduleData.client) {
+      const interruptionCheck = await checkClientInterruptions(
+        scheduleData.client,
+        scheduleData.start || scheduleData.startDate,
+        scheduleData.end || scheduleData.endDate
+      );
+
+      if (interruptionCheck.blocked) {
+        return res.status(403).json({
+          message: `Scheduling blocked: Client has an approved service interruption from ${interruptionCheck.interruption.startDate} to ${interruptionCheck.interruption.endDate}`,
+          reason: interruptionCheck.interruption.reason,
+          type: interruptionCheck.interruption.type,
+          interruptionPeriod: interruptionCheck.interruption
+        });
+      }
+    }
 
     // Check for existing schedule with same client, service, caregiver, and overlapping time
     // Exclude the current schedule being updated
@@ -286,6 +353,69 @@ exports.fetchVendorJobs = async (req, res) => {
     if (result) {
       res.json(result);
     }
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// Get client interruptions for calendar display (blocked periods)
+exports.getClientInterruptions = async (req, res) => {
+  try {
+    const { clientId, start, end } = req.query;
+
+    if (!clientId) {
+      return res.status(400).json({ message: 'Client ID is required' });
+    }
+
+    const client = await Models.Client.findById(clientId).select('interruptions firstName lastName');
+
+    if (!client) {
+      return res.status(404).json({ message: 'Client not found' });
+    }
+
+    // Filter approved interruptions that overlap with the date range
+    let interruptions = client.interruptions || [];
+    
+    // Filter by approved status only
+    interruptions = interruptions.filter(int => int.status === 'approved');
+
+    // If date range provided, filter by overlap
+    if (start && end) {
+      const rangeStart = new Date(start);
+      const rangeEnd = new Date(end);
+      
+      interruptions = interruptions.filter(int => {
+        const intStart = new Date(int.startDate);
+        const intEnd = new Date(int.endDate);
+        return intStart <= rangeEnd && intEnd >= rangeStart;
+      });
+    }
+
+    res.json({
+      clientId: client._id,
+      clientName: `${client.firstName} ${client.lastName}`,
+      interruptions: interruptions
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// Check if scheduling is blocked for a client on specific dates
+exports.checkSchedulingBlocked = async (req, res) => {
+  try {
+    const { clientId, start, end } = req.query;
+
+    if (!clientId || !start || !end) {
+      return res.status(400).json({ message: 'Client ID, start date, and end date are required' });
+    }
+
+    const result = await checkClientInterruptions(clientId, start, end);
+
+    res.json({
+      blocked: result.blocked,
+      interruption: result.interruption
+    });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

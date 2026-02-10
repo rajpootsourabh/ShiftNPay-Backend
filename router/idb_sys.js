@@ -168,6 +168,8 @@ router.delete('/payor/:id', authMiddleware.employer,PayorController.deletePayor)
 
 router.get('/schedule', authMiddleware.employer,scheduleController.getAllSchedules);
 router.get('/schedule/date-range', authMiddleware.employer,scheduleController.getSchedulesByDateRange);
+router.get('/schedule/client-interruptions', authMiddleware.employer,scheduleController.getClientInterruptions);
+router.get('/schedule/check-blocked', authMiddleware.employer,scheduleController.checkSchedulingBlocked);
 router.get('/schedule/:id', authMiddleware.employer,scheduleController.getSchedule);
 router.post('/schedule', authMiddleware.employer,scheduleController.createSchedule);
 router.put('/schedule/:id', authMiddleware.employer,scheduleController.updateSchedule);

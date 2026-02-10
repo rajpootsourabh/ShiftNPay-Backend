@@ -179,6 +179,63 @@ exports.updateClient = async (req, res) => {
       updateData = { ...req.body };
     }
 
+    // Sanitize date fields in arrays - convert empty strings to null
+    const sanitizeDateFields = (arr, dateFields) => {
+      if (!Array.isArray(arr)) return arr;
+      return arr.map(item => {
+        const sanitized = { ...item };
+        dateFields.forEach(field => {
+          if (sanitized[field] === '' || sanitized[field] === 'Invalid Date') {
+            sanitized[field] = null;
+          }
+        });
+        return sanitized;
+      });
+    };
+
+    // Sanitize reminders
+    if (updateData.reminders) {
+      updateData.reminders = sanitizeDateFields(updateData.reminders, ['completedDate', 'dueDate', 'createdDate']);
+    }
+
+    // Sanitize supervisoryVisits
+    if (updateData.supervisoryVisits) {
+      updateData.supervisoryVisits = sanitizeDateFields(updateData.supervisoryVisits, ['completedDate', 'visitDate', 'enteredDate']);
+    }
+
+    // Sanitize and validate serviceOrders
+    if (updateData.serviceOrders) {
+      updateData.serviceOrders = sanitizeDateFields(updateData.serviceOrders, ['startDate', 'endDate', 'enteredDate']);
+      
+      // Validate required fields for service orders
+      for (let i = 0; i < updateData.serviceOrders.length; i++) {
+        const order = updateData.serviceOrders[i];
+        const errors = [];
+        
+        if (!order.serviceType || order.serviceType.trim() === '') {
+          errors.push('Service Type is required');
+        }
+        if (!order.unitsPerHour || parseFloat(order.unitsPerHour) <= 0) {
+          errors.push('Units/Hour must be a positive number');
+        }
+        if (!order.payor || order.payor.trim() === '') {
+          errors.push('Payor is required');
+        }
+        if (!order.authNumber || order.authNumber.trim() === '') {
+          errors.push('Authorization Number is required');
+        }
+        if (!order.startDate) {
+          errors.push('Start Date is required');
+        }
+        
+        if (errors.length > 0) {
+          return res.status(400).json({ 
+            message: `Service Order ${i + 1} validation failed: ${errors.join(', ')}` 
+          });
+        }
+      }
+    }
+
     if (req.files && req.files.attachments) {
       await handleFileAttachments(req, updateData, clientId);
     }
