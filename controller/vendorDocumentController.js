@@ -1,4 +1,5 @@
 const VendorDocument = require("../model/VendorDocument");
+const mongoose = require('mongoose');
 const path = require('path');
 const fs = require('fs');
 const AssignedDocument = require("../model/AssignedDocument");
@@ -111,21 +112,34 @@ exports.uploadVendorDocument = async (req, res) => {
 
 exports.getVendorDocuments = async (req, res) => {
   const vendorId = req.payload.reqUserId;
-  const { search = '', date = '' } = req.query;
+  const { search = '', date = '', includeSystemForms = 'false' } = req.query;
   let query = {};
+  
+  // Only include system forms when explicitly requested (for Assign Document modal)
+  if (includeSystemForms === 'true') {
+    query.$or = [
+      { uploadedBy: null }, // System onboarding forms
+      { uploadedBy: vendorId } // Vendor's uploaded docs
+    ];
+  } else {
+    // Default: only show vendor's uploaded documents
+    query.uploadedBy = vendorId;
+  }
+  
   if (search) query.fileName = new RegExp(search, 'i');
   if (date) {
     const startDate = new Date(date);
     const endDate = new Date(startDate);
-    endDate.setDate(startDate.getDate() + 1); // Set endDate to the next day
-    query.uploadedBy = vendorId;
+    endDate.setDate(startDate.getDate() + 1);
     query.date = {
       $gte: startDate,
       $lt: endDate
     };
   }
 
-  const documents = await VendorDocument.find(query);
+  // Sort: system forms first (by docIdentity), then uploaded docs (by date desc)
+  const documents = await VendorDocument.find(query)
+    .sort({ uploadedBy: 1, docIdentity: 1, date: -1 });
   res.status(200).json(documents);
 };
 
@@ -171,14 +185,30 @@ exports.assignDocumentToEmployee = async (req, res) => {
     const vendorId = req.payload.reqUserId;
 
     if (!employeeId || !selectedIds || selectedIds.length === 0) {
-      return res.status(400).json({ message: 'Employee ID and at least one checklist are required' });
+      return res.status(400).json({ message: 'Employee ID and at least one document are required' });
     }
 
-    const assignedDocuments = selectedIds.map(documentId => ({
+    // Check for duplicates - prevent assigning same document to same employee
+    const existingAssignments = await AssignedDocument.find({
+      documentId: { $in: selectedIds },
+      assignedTo: employeeId
+    });
+
+    const existingDocIds = existingAssignments.map(a => a.documentId.toString());
+    const newDocIds = selectedIds.filter(id => !existingDocIds.includes(id));
+
+    if (newDocIds.length === 0) {
+      return res.status(400).json({ 
+        message: 'All selected documents are already assigned to this employee',
+        status: false
+      });
+    }
+
+    const assignedDocuments = newDocIds.map(documentId => ({
       documentId,
       assignedTo: employeeId,
       assignedBy: vendorId,
-      submittedFileUrl: null, // Default to null
+      submittedFileUrl: null,
       status: "Pending",
     }));
 
@@ -186,17 +216,90 @@ exports.assignDocumentToEmployee = async (req, res) => {
     let employee = await Employee.findById({ _id: employeeId });
     let vendor = await User.findById({ _id: vendorId });
 
-    await Services.NotificationService.sendNotification(employee._id, null, 'New Document Assigned!', `${vendor.name} has Assigned you a document.`);
+    await Services.NotificationService.sendNotification(employee._id, null, 'New Document Assigned!', `${vendor.name} has assigned you ${newDocIds.length} document(s).`);
 
-    // Send response
     res.status(201).json({
-      message: 'Documents successfully assigned to the employee!',
+      message: `${newDocIds.length} document(s) successfully assigned. ${existingDocIds.length > 0 ? `${existingDocIds.length} duplicate(s) skipped.` : ''}`,
       assignedDocuments,
-      status:true
+      status: true,
+      skipped: existingDocIds.length
     });
 
   } catch (error) {
     console.error('Error adding employee checklist:', error);
     res.status(500).json({ message: 'Server error' });
+  }
+};
+
+// Seed predefined onboarding forms as VendorDocuments (called once per vendor)
+exports.seedOnboardingForms = async (req, res) => {
+  try {
+    const vendorId = req.payload.reqUserId;
+    
+    const onboardingForms = [
+      { _id: new mongoose.Types.ObjectId("65e0000000000000000f0001"), code: "1020", name: "Employment Application" },
+      { _id: new mongoose.Types.ObjectId("65e0000000000000000f0002"), code: "1021", name: "Equal Employment Opportunity" },
+      { _id: new mongoose.Types.ObjectId("65e0000000000000000f0003"), code: "1050", name: "Skills Checklist" },
+      { _id: new mongoose.Types.ObjectId("65e0000000000000000f0004"), code: "1060", name: "Request for Reference" },
+      { _id: new mongoose.Types.ObjectId("65e0000000000000000f0005"), code: "1070", name: "Background Check Authorization" },
+      { _id: new mongoose.Types.ObjectId("65e0000000000000000f0006"), code: "1204", name: "Care Associate Availability" },
+      { _id: new mongoose.Types.ObjectId("65e0000000000000000f0007"), code: "1010", name: "Employee Personal Action" },
+      { _id: new mongoose.Types.ObjectId("65e0000000000000000f0008"), code: "1201", name: "Handbook Acknowledgement" },
+      { _id: new mongoose.Types.ObjectId("65e0000000000000000f0009"), code: "1202", name: "Orientation Acknowledgement" },
+      { _id: new mongoose.Types.ObjectId("65e0000000000000000f000a"), code: "1203", name: "Orientation Curriculum" },
+      { _id: new mongoose.Types.ObjectId("65e0000000000000000f000b"), code: "1220", name: "Abuse & Neglect Policy" },
+      { _id: new mongoose.Types.ObjectId("65e0000000000000000f000c"), code: "1530", name: "Care Associate Schedule Acknowledgement" },
+      { _id: new mongoose.Types.ObjectId("65e0000000000000000f000d"), code: "1600", name: "Emergency Contact Information" },
+      { _id: new mongoose.Types.ObjectId("65e0000000000000000f000e"), code: "1720", name: "Hepatitis B Consent" },
+      { _id: new mongoose.Types.ObjectId("65e0000000000000000f000f"), code: "1740", name: "Pre-Employment Drug Consent" },
+      { _id: new mongoose.Types.ObjectId("65e0000000000000000f0010"), code: "2900", name: "ID Agreement" },
+      { _id: new mongoose.Types.ObjectId("65e0000000000000000f0011"), code: "4000", name: "Nondisclosure / Noncompete" },
+      { _id: new mongoose.Types.ObjectId("65e0000000000000000f0012"), code: "I-9", name: "I-9 Employment Eligibility" },
+      { _id: new mongoose.Types.ObjectId("65e0000000000000000f0013"), code: "W-4", name: "W-4 Tax Form" },
+    ];
+
+    // Check if forms already exist
+    const existingCount = await VendorDocument.countDocuments({
+      _id: { $in: onboardingForms.map(f => f._id) }
+    });
+
+    if (existingCount === onboardingForms.length) {
+      return res.status(200).json({ 
+        message: 'Onboarding forms already seeded', 
+        status: true,
+        count: existingCount 
+      });
+    }
+
+    // Insert forms that don't exist yet
+    const docsToInsert = [];
+    for (const form of onboardingForms) {
+      const exists = await VendorDocument.findById(form._id);
+      if (!exists) {
+        docsToInsert.push({
+          _id: form._id,
+          fileName: form.name,
+          docIdentity: form.code,
+          fileSize: "0 KB",
+          date: new Date(),
+          fileUrl: `/forms/${form.code.toLowerCase().replace(/\s+/g, '-')}.pdf`,
+          uploadedBy: null // System document
+        });
+      }
+    }
+
+    if (docsToInsert.length > 0) {
+      await VendorDocument.insertMany(docsToInsert, { ordered: false });
+    }
+
+    res.status(201).json({ 
+      message: 'Onboarding forms seeded successfully', 
+      status: true,
+      inserted: docsToInsert.length 
+    });
+
+  } catch (error) {
+    console.error('Error seeding onboarding forms:', error);
+    res.status(500).json({ message: 'Server error', status: false });
   }
 };

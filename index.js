@@ -33,6 +33,7 @@ const documentsPath = path.join(assetsPath, "documents");
 const vendorDocumentsPath = path.join(documentsPath, "vendor");
 const clientDocumentsPath = path.join(documentsPath, "clients");
 const invoicesPath = path.join(assetsPath, "invoices");
+const uploadsPath = path.join(__dirname, "uploads");
 
 // Create directories if they don't exist
 [
@@ -41,6 +42,7 @@ const invoicesPath = path.join(assetsPath, "invoices");
   vendorDocumentsPath,
   clientDocumentsPath,
   invoicesPath,
+  uploadsPath,
 ].forEach((dir) => {
   if (!fs.existsSync(dir)) {
     fs.mkdirSync(dir, { recursive: true });
@@ -90,11 +92,17 @@ app.use(
   "/vendor-documents",
   express.static(__dirname + "/assets/documents/vendor")
 );
+// Also handle /api/vendor-documents for backward compatibility with old data
+app.use(
+  "/api/vendor-documents",
+  express.static(__dirname + "/assets/documents/vendor")
+);
 app.use("/invoices", express.static(__dirname + "/assets/invoices"));
 app.use(
   "/v1/client-documents",
   express.static(path.join(__dirname, "assets/documents/clients"))
 );
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 // API Routes
 app.use("/v1/admin", superRouter);

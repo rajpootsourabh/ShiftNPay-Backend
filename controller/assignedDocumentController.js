@@ -52,10 +52,48 @@ exports.uploadCompletedDocument = async (req, res) => {
   }
 
   assignedDocument.submittedFileUrl = filePath;
-  assignedDocument.status = "Submitted";
+  assignedDocument.status = "Completed";
+  assignedDocument.completedAt = new Date();
   await assignedDocument.save();
 
   res.json({ message: "Document uploaded successfully", assignedDocument });
+};
+
+// ✅ Update document status to "In Progress" when employee starts filling
+exports.updateDocumentStatus = async (req, res) => {
+  try {
+    const { documentId, status } = req.body;
+    const employeeId = req.payload.reqUserId;
+
+    if (!documentId || !status) {
+      return res.status(400).json({ success: false, message: "Document ID and status are required" });
+    }
+
+    // Only allow valid status transitions
+    const validStatuses = ["Pending", "In Progress", "Completed"];
+    if (!validStatuses.includes(status)) {
+      return res.status(400).json({ success: false, message: "Invalid status value" });
+    }
+
+    const updateData = { status };
+    if (status === "Completed") {
+      updateData.completedAt = new Date();
+    }
+
+    const updatedDocument = await AssignedDocument.findOneAndUpdate(
+      { _id: documentId, assignedTo: employeeId },
+      updateData,
+      { new: true }
+    ).populate("documentId").populate("assignedBy");
+
+    if (!updatedDocument) {
+      return res.status(404).json({ success: false, message: "Document not found" });
+    }
+
+    res.status(200).json({ success: true, document: updatedDocument });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
 };
 
 // ✅ Vendor views completed documents submitted by employees
@@ -123,7 +161,8 @@ exports.uploadDoucmentByEmployee = async (req, res) => {
         { _id: req.body.documentId, assignedTo: emploeeId },  // Match the document
         { 
           submittedFileUrl :fileUrl,
-          status: 'Submitted'
+          status: 'Completed',
+          completedAt: new Date()
         },
         { new: true } // Return the updated document
       );

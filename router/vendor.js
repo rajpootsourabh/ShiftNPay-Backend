@@ -2,7 +2,7 @@ const express = require('express')
 const { registerVendor, loginVendor, createEmployeee, uploadProfileImage, getSingleVendorById, updateProfileUpdate, updateRestorauntProfile, getSingleRestorauntProfile, changePasswordByUserIdAndEmail, changePasswordById, dashboard, getAllEmpTrackingData, overTimeCalculations, updateExistingEmployeesWithEmpId, getCategoriesList, subscriptionPlans, createCheckoutSession, handleSuccessStripe, getCatalogues, getSubcategories, getItems, getReverseCategoryData, registerVendorFromAdmin, notificationsList, notificationsUnreadCount, notificationsMarkAllAsRead, createChecklist, getAllChecklists, addEmployeeChecklist, employeeChecklist, assignChecklistToEmployee, updateEmployeeChecklist, updateCheckList, getAssignedChecklists, deleteOnboardingCheckList, updateEmployeeChecklistSteps, getEmployeesJobsTrackingRequest, trackerRequestApprove, handleTimeTrackerRequest, getCurrentWeekShiftSchedules, getCurrentMonthShiftSchedules, getEmployeeList, getProfile } = require('../controller/vendor')
 const { verifyToken } = require('../middleware/Auth')
 const { isValidationParams } = require('../middleware/jobValidation')
-const { uploadVendorDocument, getVendorDocuments, updateVendorDocument, deleteVendorDocument, assignDocumentToEmployee, deleteAssignedDocument } = require('../controller/vendorDocumentController')
+const { uploadVendorDocument, getVendorDocuments, updateVendorDocument, deleteVendorDocument, assignDocumentToEmployee, deleteAssignedDocument, seedOnboardingForms } = require('../controller/vendorDocumentController')
 const { assignDocument, getAssignedDocuments, downloadSubmittedDocument } = require('../controller/assignedDocumentController')
 const vendorRouter = express.Router()
 const Controllers = require('./../controller');
@@ -80,6 +80,7 @@ vendorRouter.post("/documents/upload", verifyToken, uploadVendorDocument);
 vendorRouter.get("/documents", verifyToken, getVendorDocuments);
 vendorRouter.put("/documents/:id", verifyToken, updateVendorDocument);
 vendorRouter.delete("/documents/:id", verifyToken, deleteVendorDocument);
+vendorRouter.post("/seed-onboarding-forms", verifyToken, seedOnboardingForms);
 vendorRouter.get("/assignedDocuments", verifyToken, getAssignedDocuments);
 vendorRouter.post("/assign-document", verifyToken, assignDocumentToEmployee);
 vendorRouter.post("/delete-assign-assignedDocument", verifyToken, deleteAssignedDocument);

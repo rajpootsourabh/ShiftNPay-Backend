@@ -2,7 +2,7 @@ const express = require('express')
 const { getAllEmploye, getEmpByVendroId,notificationsTest, deActivateEmp,testNotificationCreate, getEmpById, empLogin, notificationsUnreadCount, resetDefaultPasswordEmpId, updateEmpyFromVender, deleteJobFromEmp, deleteEmp, updateAbount, updateEmp, forgotPassword, updateProfileEmp,notificationsList,notificationsMarkAllAsRead, getProfile, updateProfile, assignedJobs, closeAssignedJob, getTrackingRequestStatus, dashboard, getColleagues } = require('../controller/employee')
 const { verifyToken } = require('../middleware/Auth')
 const { idValidationBody } = require('../middleware/jobValidation')
-const { uploadCompletedDocument, getSubmittedDocuments, getAssignedDocumentsToEmployee, uploadDoucmentByEmployee } = require('../controller/assignedDocumentController')
+const { uploadCompletedDocument, getSubmittedDocuments, getAssignedDocumentsToEmployee, uploadDoucmentByEmployee, updateDocumentStatus } = require('../controller/assignedDocumentController')
 const { getEmployeeCategoryAccess } = require('../controller/admin/empMenuAccessController')
 const empRouter = express.Router()
 const  authMiddleware  = require('../middleware/authMiddleware');
@@ -65,6 +65,7 @@ empRouter.get("/documents/submitted/:vendorId", getSubmittedDocuments);
 
 empRouter.get("/assignedDocuments",verifyToken, getAssignedDocumentsToEmployee);
 empRouter.post("/uploadDoucment",verifyToken, uploadDoucmentByEmployee);
+empRouter.post("/updateDocumentStatus",verifyToken, updateDocumentStatus);
 
 empRouter.get('/categories/allowed', authMiddleware.employee,getEmployeeCategoryAccess);
 
